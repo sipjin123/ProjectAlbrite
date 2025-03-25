@@ -7,7 +7,12 @@ public class ProjAlbrite : ModuleRules
 	public ProjAlbrite(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-
+		PublicIncludePaths.AddRange(
+			new string[] {
+				"ProjAlbrite/Public"
+			}
+		);
+		
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", 
 			"AIModule", 
 			"UMG",
