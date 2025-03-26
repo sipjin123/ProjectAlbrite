@@ -113,6 +113,16 @@ bool AProjAlbriteCharacter::Server_ActivateAbility_Validate(EAbilityInputID Inpu
 	return true;
 }
 
+void AProjAlbriteCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	if (HasAuthority())  
+	{
+		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
