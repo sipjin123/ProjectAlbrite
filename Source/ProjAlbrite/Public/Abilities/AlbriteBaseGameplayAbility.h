@@ -23,6 +23,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Abilities")
 	EAbilityInputID AbilityInputId;
 	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Abilities")
+	bool bDisabledMovement;
+	
 	// Override Activate Ability
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
