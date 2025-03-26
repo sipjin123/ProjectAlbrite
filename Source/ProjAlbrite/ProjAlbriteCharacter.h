@@ -75,11 +75,7 @@ public:
 	
 	/** Gameplay Ability System */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="GAS", meta = (AllowPrivateAccess="true"))
-	class UAbilitySystemComponent* AbilitySystemComponent;
-	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override
-	{
-		return  AbilitySystemComponent;
-	}
+	class UAlbriteAbilitySystemComponent* AbilitySystemComponent;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 	/** Gameplay Attributes */
