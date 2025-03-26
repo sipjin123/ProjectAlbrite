@@ -86,6 +86,33 @@ void AProjAlbriteCharacter::GrantAbility(TSubclassOf<UAlbriteBaseGameplayAbility
 	}
 }
 
+void AProjAlbriteCharacter::OnAbilityInputPressed(EAbilityInputID InputID)
+{
+	// Request ability cast from server
+	Server_ActivateAbility(InputID);
+}
+
+void AProjAlbriteCharacter::Server_ActivateAbility_Implementation(EAbilityInputID InputID)
+{
+	if (AbilitySystemComponent)
+	{
+		for (FGameplayAbilitySpec& Spec : AbilitySystemComponent->GetActivatableAbilities())
+		{
+			// Server will try to cast ability that uses Input Id
+			if (Spec.InputID == static_cast<int32>(InputID))
+			{
+				AbilitySystemComponent->TryActivateAbility(Spec.Handle);
+				break;
+			}
+		}
+	}
+}
+
+bool AProjAlbriteCharacter::Server_ActivateAbility_Validate(EAbilityInputID InputID)
+{
+	return true;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
