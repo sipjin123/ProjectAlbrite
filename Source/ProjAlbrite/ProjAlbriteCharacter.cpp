@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "ProjAlbriteCharacter.h"
+#include "AbilitySystemComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -9,7 +10,10 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Net/UnrealNetwork.h"
 #include "InputActionValue.h"
+#include "Abilities/AlbriteBaseGameplayAbility.h"
+#include "Enums/GameEnums.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -52,6 +56,10 @@ AProjAlbriteCharacter::AProjAlbriteCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -85,6 +93,25 @@ void AProjAlbriteCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AProjAlbriteCharacter::Look);
+
+		if (!AbilitySystemComponent) return;
+
+		// Bind Ability Activation to Input
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(EnhancedInputComponent, 
+			FGameplayAbilityInputBinds(
+				TEXT("Confirm"), TEXT("Cancel"),
+				"/Script/ProjAlbrite.EAbilityInputID", 
+				static_cast<int32>(EAbilityInputID::None), 
+				static_cast<int32>(EAbilityInputID::None)
+			)
+		);
+
+		// Bind Action to ability input pressed function
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AProjAlbriteCharacter::OnAbilityInputPressed, EAbilityInputID::Attack);
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AProjAlbriteCharacter::OnAbilityInputPressed, EAbilityInputID::Dash);
+		EnhancedInputComponent->BindAction(DefenseAction, ETriggerEvent::Started, this, &AProjAlbriteCharacter::OnAbilityInputPressed, EAbilityInputID::Defense);
+		EnhancedInputComponent->BindAction(SpecialAction, ETriggerEvent::Started, this, &AProjAlbriteCharacter::OnAbilityInputPressed, EAbilityInputID::Special);
+		EnhancedInputComponent->BindAction(UltimateAction, ETriggerEvent::Started, this, &AProjAlbriteCharacter::OnAbilityInputPressed, EAbilityInputID::Ultimate);
 	}
 	else
 	{
