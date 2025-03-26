@@ -6,9 +6,11 @@
 #include "GameFramework/Character.h"
 #include "Interfaces/IDamageable.h"
 #include "Enums/GameEnums.h"
-#include "AlbriteAttributeSet.generated.h"
+//#include "AlbriteAttributeSet.generated.h"
 #include "AbilitySystemInterface.h"
+#include "Interfaces/IAlbriteCharacter.h"
 #include "Logging/LogMacros.h"
+#include "Stats/AlbriteAttributeSet.h"
 #include "ProjAlbriteCharacter.generated.h"
 
 class USpringArmComponent;
@@ -19,10 +21,11 @@ struct FInputActionValue;
 
 class UAlbriteBaseGameplayAbility;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttributeChange, int, AttributeValue);
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AProjAlbriteCharacter : public ACharacter, public IAbilitySystemInterface, public IIDamageable
+class AProjAlbriteCharacter : public ACharacter, public IAbilitySystemInterface, public IIDamageable, public IIAlbriteCharacter
 {
 	GENERATED_BODY()
 
@@ -130,5 +133,20 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	/** Retrieves Character Movement Component **/
+	virtual UCharacterMovementComponent* GetCharacterMovementComponent_Implementation() override { return GetCharacterMovement(); };
+
+	/** Retrieves The base Attribute for Health **/
+	virtual float OnGetCurrentHealth_Implementation() override { return AttributeSet ? AttributeSet->Health.GetBaseValue() : 0.1f; };
+	
+	/** Retrieves The base Attribute for Max Health **/
+	virtual float OnGetMaxHealth_Implementation() override { return AttributeSet ? AttributeSet->MaxHealth.GetBaseValue() : 0.1f; };
+
+	// This callback can be used by the UI.
+	UPROPERTY(BlueprintAssignable, Category = "Attribute callbacks")
+	FAttributeChange OnHealthChange;
+	
+	void OnHealthUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const;
 };
 
