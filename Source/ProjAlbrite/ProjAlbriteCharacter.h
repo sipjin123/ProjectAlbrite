@@ -80,6 +80,7 @@ public:
 	{
 		return  AbilitySystemComponent;
 	}
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 	/** Gameplay Attributes */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="GAS", meta = (AllowPrivateAccess="true"))
