@@ -121,6 +121,10 @@ protected:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	/** Reference to the actor component */
+	UPROPERTY(EditAnywhere, Category = "Components")
+	class UStatusActorComponent* StatusActorComponent;
+	
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

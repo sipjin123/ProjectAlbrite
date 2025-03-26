@@ -14,6 +14,7 @@
 #include "InputActionValue.h"
 #include "Abilities/AlbriteBaseGameplayAbility.h"
 #include "ActorComponents/AlbriteAbilitySystemComponent.h"
+#include "ActorComponents/StatusActorComponent.h"
 #include "Enums/GameEnums.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -127,6 +128,9 @@ void AProjAlbriteCharacter::BeginPlay()
 	{
 		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
 	}
+	
+	StatusActorComponent = FindComponentByClass<UStatusActorComponent>();
+	check(StatusActorComponent);
 }
 
 //////////////////////////////////////////////////////////////////////////
