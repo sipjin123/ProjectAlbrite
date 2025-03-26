@@ -7,7 +7,8 @@
 #include "AlbriteBPFunctionLibrary.generated.h"
 
 /**
- * 
+ * The helper class that allows collecting universally used repetitive functions
+ * Author: Burlin
  */
 UCLASS(Blueprintable) 
 class PROJALBRITE_API UAlbriteBPFunctionLibrary : public UBlueprintFunctionLibrary
