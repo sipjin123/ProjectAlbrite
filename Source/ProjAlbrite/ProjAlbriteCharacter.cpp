@@ -62,6 +62,30 @@ AProjAlbriteCharacter::AProjAlbriteCharacter()
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 }
 
+void AProjAlbriteCharacter::InitializeAbilities()
+{
+	check (AbilitySystemComponent);
+	if (HasAuthority() && !bAbilitiesInitialized && GameplayAbilities.Num() > 0)
+	{
+		// Grant active abilities only for the server, retrieve the Ability Input Id assigned to the Ability
+		for (TSubclassOf<UAlbriteBaseGameplayAbility>& StartupAbilityEntry : GameplayAbilities)
+		{
+			GrantAbility(StartupAbilityEntry, StartupAbilityEntry.GetDefaultObject()->AbilityInputId);
+		}
+		bAbilitiesInitialized = true;
+	}
+}
+
+void AProjAlbriteCharacter::GrantAbility(TSubclassOf<UAlbriteBaseGameplayAbility> AbilityClass, EAbilityInputID InputId) const
+{
+	if (HasAuthority() && AbilitySystemComponent && AbilityClass)
+	{
+		// Give ability to player and assign Input Id that links to this ability
+		const FGameplayAbilitySpec AbilitySpec(AbilityClass, 1, static_cast<int32>(InputId));
+		AbilitySystemComponent->GiveAbility(AbilitySpec);
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
