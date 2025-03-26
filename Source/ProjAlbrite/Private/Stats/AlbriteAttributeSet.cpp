@@ -5,6 +5,16 @@
 #include "Net/UnrealNetwork.h"
 
 
+UAlbriteAttributeSet::UAlbriteAttributeSet()
+{
+	// Assign default values directly
+	// TODO: Create a data table and process contents from there
+	Health.SetBaseValue(100.0f);
+	Health.SetCurrentValue(100.0f);
+	MaxHealth.SetBaseValue(100.0f);
+	MaxHealth.SetCurrentValue(100.0f);
+}
+
 void UAlbriteAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

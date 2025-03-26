@@ -14,11 +14,13 @@
  * The primary attribute data class that is used to manipulate character stats using GAS
  * Author: Burlin
  */
-UCLASS()
+UCLASS(BlueprintType)
 class PROJALBRITE_API UAlbriteAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 public:
+	
+	UAlbriteAttributeSet();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(BlueprintReadOnly, Category="Attributes", ReplicatedUsing = OnRep_Health)

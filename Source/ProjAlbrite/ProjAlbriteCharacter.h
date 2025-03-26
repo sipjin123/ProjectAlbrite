@@ -80,8 +80,8 @@ public:
 	
 	/** Gameplay Attributes */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="GAS", meta = (AllowPrivateAccess="true"))
-	TObjectPtr<UAlbriteAttributeSet> AttributeSet;
-
+	const class UAlbriteAttributeSet* AttributeSet;
+	
 	/** Gameplay Array of Abilities */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="GAS")
 	TArray<TSubclassOf<UAlbriteBaseGameplayAbility>> GameplayAbilities;

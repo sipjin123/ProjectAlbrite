@@ -62,6 +62,8 @@ AProjAlbriteCharacter::AProjAlbriteCharacter()
 	AbilitySystemComponent = CreateDefaultSubobject<UAlbriteAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	
+	AttributeSet = CreateDefaultSubobject<UAlbriteAttributeSet>(TEXT("Attributes"));	
 }
 
 UAbilitySystemComponent* AProjAlbriteCharacter::GetAbilitySystemComponent() const
@@ -131,6 +133,12 @@ void AProjAlbriteCharacter::BeginPlay()
 	
 	StatusActorComponent = FindComponentByClass<UStatusActorComponent>();
 	check(StatusActorComponent);
+	
+	if (IsValid(AbilitySystemComponent))
+	{
+		AttributeSet = AbilitySystemComponent->GetSet<UAlbriteAttributeSet>();
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UAlbriteAttributeSet::GetHealthAttribute()).AddUObject(this, &AProjAlbriteCharacter::OnHealthUpdated);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -188,6 +196,11 @@ void AProjAlbriteCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+}
+
+void AProjAlbriteCharacter::OnHealthUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const
+{
+	OnHealthChange.Broadcast(OnAttributeChangeData.NewValue);
 }
 
 void AProjAlbriteCharacter::Move(const FInputActionValue& Value)
