@@ -89,7 +89,24 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="GAS")
 	TArray<TSubclassOf<UAlbriteBaseGameplayAbility>> GameplayAbilities;
 
+	/** Initializes Abilities to player */
+	UFUNCTION(BlueprintCallable, Category="GAS")
+	void InitializeAbilities();
 
+	/** Checks if abilities have been initialized */
+	bool bAbilitiesInitialized = false;
+
+	/** Give Abilities to player */
+	void GrantAbility(TSubclassOf<UAlbriteBaseGameplayAbility> AbilityClass, EAbilityInputID InputId) const;
+
+	/** Used when client requests an ability to be casted using input id */
+	UFUNCTION(BlueprintCallable)
+	void OnAbilityInputPressed(EAbilityInputID InputID);
+
+	/** Server side activation of ability based on input id */
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_ActivateAbility(EAbilityInputID InputID);
+	
 protected:
 	/** Called for Begin play */
 	virtual void BeginPlay() override;
