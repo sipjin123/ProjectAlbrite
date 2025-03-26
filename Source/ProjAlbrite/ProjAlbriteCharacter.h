@@ -4,6 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/IDamageable.h"
+#include "Enums/GameEnums.h"
+#include "AlbriteAttributeSet.generated.h"
+#include "AbilitySystemInterface.h"
 #include "Logging/LogMacros.h"
 #include "ProjAlbriteCharacter.generated.h"
 
@@ -13,10 +17,12 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+class UAlbriteBaseGameplayAbility;
+
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AProjAlbriteCharacter : public ACharacter
+class AProjAlbriteCharacter : public ACharacter, public IAbilitySystemInterface, public IIDamageable
 {
 	GENERATED_BODY()
 
@@ -67,9 +73,27 @@ class AProjAlbriteCharacter : public ACharacter
 public:
 	AProjAlbriteCharacter();
 	
+	/** Gameplay Ability System */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="GAS", meta = (AllowPrivateAccess="true"))
+	class UAbilitySystemComponent* AbilitySystemComponent;
+	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override
+	{
+		return  AbilitySystemComponent;
+	}
+	
+	/** Gameplay Attributes */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="GAS", meta = (AllowPrivateAccess="true"))
+	TObjectPtr<UAlbriteAttributeSet> AttributeSet;
+
+	/** Gameplay Array of Abilities */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="GAS")
+	TArray<TSubclassOf<UAlbriteBaseGameplayAbility>> GameplayAbilities;
+
 
 protected:
-
+	/** Called for Begin play */
+	virtual void BeginPlay() override;
+	
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
