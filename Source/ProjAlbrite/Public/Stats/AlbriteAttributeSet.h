@@ -23,6 +23,10 @@ public:
 	UAlbriteAttributeSet();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY(BlueprintReadOnly, Category="Attributes", ReplicatedUsing = OnRep_Shield)
+	FGameplayAttributeData Shield;
+	ATTRIBUTE_ASSESSORS(UAlbriteAttributeSet, Shield);
+
 	UPROPERTY(BlueprintReadOnly, Category="Attributes", ReplicatedUsing = OnRep_Health)
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ASSESSORS(UAlbriteAttributeSet, Health);
@@ -38,4 +42,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void OnRep_MaxHealth(const FGameplayAttributeData& OldHMaxealth);
+	
+	UFUNCTION(BlueprintCallable)
+	void OnRep_Shield(const FGameplayAttributeData& OldShield);
 };

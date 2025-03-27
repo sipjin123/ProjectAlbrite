@@ -13,6 +13,9 @@ UAlbriteAttributeSet::UAlbriteAttributeSet()
 	Health.SetCurrentValue(100.0f);
 	MaxHealth.SetBaseValue(100.0f);
 	MaxHealth.SetCurrentValue(100.0f);
+
+	Shield.SetBaseValue(0.0f);
+	Shield.SetCurrentValue(0.0f);
 }
 
 void UAlbriteAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -21,6 +24,7 @@ void UAlbriteAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME_CONDITION_NOTIFY(UAlbriteAttributeSet, Health, COND_None, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAlbriteAttributeSet, MaxHealth, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAlbriteAttributeSet, Shield, COND_None, REPNOTIFY_OnChanged);
 }
 
 void UAlbriteAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth)
@@ -31,4 +35,9 @@ void UAlbriteAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth)
 void UAlbriteAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldHMaxealth)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAlbriteAttributeSet, MaxHealth, OldHMaxealth);
+}
+
+void UAlbriteAttributeSet::OnRep_Shield(const FGameplayAttributeData& OldShield)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAlbriteAttributeSet, Shield, OldShield);
 }
