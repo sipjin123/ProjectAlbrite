@@ -16,6 +16,7 @@
 #include "ActorComponents/AlbriteAbilitySystemComponent.h"
 #include "ActorComponents/StatusActorComponent.h"
 #include "ActorComponents/VFXActorComponent.h"
+#include "Core/AlbriteGameInstance.h"
 #include "Enums/GameEnums.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -150,6 +151,12 @@ void AProjAlbriteCharacter::BeginPlay()
 		AbilitySystemComponent->RegisterGameplayTagEvent(FGameplayTag::RequestGameplayTag(FName("Status.Stun")),
 									  EGameplayTagEventType::NewOrRemoved)
 			.AddUObject(this, &AProjAlbriteCharacter::OnStunTagChanged);
+	}
+
+	UAlbriteGameInstance* GI = Cast<UAlbriteGameInstance>(GetGameInstance());
+	if (GI && HasAuthority())
+	{
+		GI->RegisterCharacter(this);
 	}
 }
 
