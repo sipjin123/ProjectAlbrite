@@ -130,6 +130,9 @@ protected:
 	/** Reference to the actor component */
 	UPROPERTY(EditAnywhere, Category = "Components")
 	class UStatusActorComponent* StatusActorComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Components")
+	class UVFXActorComponent* VFXActorComponent;
 	
 public:
 	/** Returns CameraBoom subobject **/

@@ -15,6 +15,7 @@
 #include "Abilities/AlbriteBaseGameplayAbility.h"
 #include "ActorComponents/AlbriteAbilitySystemComponent.h"
 #include "ActorComponents/StatusActorComponent.h"
+#include "ActorComponents/VFXActorComponent.h"
 #include "Enums/GameEnums.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -132,7 +133,10 @@ void AProjAlbriteCharacter::BeginPlay()
 	}
 	
 	StatusActorComponent = FindComponentByClass<UStatusActorComponent>();
+	VFXActorComponent = FindComponentByClass<UVFXActorComponent>();
+
 	check(StatusActorComponent);
+	check(VFXActorComponent);
 	
 	if (IsValid(AbilitySystemComponent))
 	{
