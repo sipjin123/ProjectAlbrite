@@ -4,13 +4,13 @@
 #include "Abilities/ExCal_DamageHealth.h"
 #include "Stats/AlbriteAttributeSet.h"
 
-struct StatCapture
+struct CombatStatCapture
 {
 	// Declares the relevant variable that will be captured from attribute of a target
 	DECLARE_ATTRIBUTE_CAPTUREDEF(Health);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(Shield);
 
-	StatCapture()
+	CombatStatCapture()
 	{
 		// Defines the relevant variable that will be captured from attribute of a target
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAlbriteAttributeSet, Health, Target, false);
@@ -18,17 +18,17 @@ struct StatCapture
 	}
 };
 
-static StatCapture& GetStatCapture()
+static CombatStatCapture& GetCombatStatCapture()
 {
-	static StatCapture StatCapture;
+	static CombatStatCapture StatCapture;
 	return StatCapture;
 }
 
 UExCal_DamageHealth::UExCal_DamageHealth()
 {
 	// Capture relevant variables here in constructor
-	RelevantAttributesToCapture.Add(GetStatCapture().HealthDef);
-	RelevantAttributesToCapture.Add(GetStatCapture().ShieldDef);
+	RelevantAttributesToCapture.Add(GetCombatStatCapture().HealthDef);
+	RelevantAttributesToCapture.Add(GetCombatStatCapture().ShieldDef);
 }
 
 void UExCal_DamageHealth::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
@@ -46,9 +46,9 @@ void UExCal_DamageHealth::Execute_Implementation(const FGameplayEffectCustomExec
 
 	// Capture relevant attributes
 	float CurrentShield = 0.0f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetStatCapture().ShieldDef, EvalParams, CurrentShield);
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetCombatStatCapture().ShieldDef, EvalParams, CurrentShield);
 	float CurrentHealth = 0.0f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetStatCapture().HealthDef, EvalParams, CurrentHealth);
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetCombatStatCapture().HealthDef, EvalParams, CurrentHealth);
 	//-------------------------------------------------------------
 
 	// Retrieve the SetByCaller Magnitude for Damage
@@ -73,6 +73,6 @@ void UExCal_DamageHealth::Execute_Implementation(const FGameplayEffectCustomExec
 	float NewHealth = FMath::Max(0.0f, CurrentHealth - RemainingDamage);
 
 	// Override the Shield and Health
-	OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(GetStatCapture().ShieldProperty, EGameplayModOp::Override, NewShield));
-	OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(GetStatCapture().HealthProperty, EGameplayModOp::Override, NewHealth));
+	OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(GetCombatStatCapture().ShieldProperty, EGameplayModOp::Override, NewShield));
+	OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(GetCombatStatCapture().HealthProperty, EGameplayModOp::Override, NewHealth));
 }
