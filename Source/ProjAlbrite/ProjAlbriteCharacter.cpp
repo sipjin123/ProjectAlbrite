@@ -16,6 +16,7 @@
 #include "ActorComponents/AlbriteAbilitySystemComponent.h"
 #include "ActorComponents/StatusActorComponent.h"
 #include "ActorComponents/VFXActorComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Core/AlbriteGameInstance.h"
 #include "Enums/GameEnums.h"
 
@@ -65,12 +66,14 @@ AProjAlbriteCharacter::AProjAlbriteCharacter()
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 	
-	AttributeSet = CreateDefaultSubobject<UAlbriteAttributeSet>(TEXT("Attributes"));	
-}
-
-UAbilitySystemComponent* AProjAlbriteCharacter::GetAbilitySystemComponent() const
-{
-	return AbilitySystemComponent;
+	AttributeSet = CreateDefaultSubobject<UAlbriteAttributeSet>(TEXT("Attributes"));
+	
+	// Create and attach the widget component
+	CombatWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("CombatWidget"));
+	CombatWidgetComponent->SetupAttachment(RootComponent); // Attach to the character
+	CombatWidgetComponent->SetWidgetSpace(EWidgetSpace::World); // Set to World Space
+	CombatWidgetComponent->SetDrawSize(FVector2D(100, 10)); // Set UI size
+	CombatWidgetComponent->SetRelativeLocation(FVector(0, 0, 100)); // Position above head
 }
 
 void AProjAlbriteCharacter::InitializeAbilities()
@@ -142,14 +145,19 @@ void AProjAlbriteCharacter::BeginPlay()
 	if (IsValid(AbilitySystemComponent))
 	{
 		AttributeSet = AbilitySystemComponent->GetSet<UAlbriteAttributeSet>();
-		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UAlbriteAttributeSet::GetHealthAttribute()).AddUObject(this, &AProjAlbriteCharacter::OnHealthUpdated);
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+			UAlbriteAttributeSet::GetHealthAttribute()).AddUObject(this, &AProjAlbriteCharacter::OnHealthUpdated);
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+			UAlbriteAttributeSet::GetShieldAttribute()).AddUObject(this, &AProjAlbriteCharacter::OnShieldUpdated);
 
-		AbilitySystemComponent->RegisterGameplayTagEvent(FGameplayTag::RequestGameplayTag(FName("Status.Invulnerable")),
-									  EGameplayTagEventType::NewOrRemoved)
+		AbilitySystemComponent->RegisterGameplayTagEvent(
+			FGameplayTag::RequestGameplayTag(FName("Status.Invulnerable")),
+			EGameplayTagEventType::NewOrRemoved)
 			.AddUObject(this, &AProjAlbriteCharacter::OnInvulnerableTagChanged);
 		
-		AbilitySystemComponent->RegisterGameplayTagEvent(FGameplayTag::RequestGameplayTag(FName("Status.Stun")),
-									  EGameplayTagEventType::NewOrRemoved)
+		AbilitySystemComponent->RegisterGameplayTagEvent(
+			FGameplayTag::RequestGameplayTag(FName("Status.Stun")),
+			EGameplayTagEventType::NewOrRemoved)
 			.AddUObject(this, &AProjAlbriteCharacter::OnStunTagChanged);
 	}
 
@@ -158,6 +166,7 @@ void AProjAlbriteCharacter::BeginPlay()
 	{
 		GI->RegisterCharacter(this);
 	}
+	CombatWidget = Cast<UCombatUnitWidget>(CombatWidgetComponent->GetWidget());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -217,9 +226,36 @@ void AProjAlbriteCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	}
 }
 
+void AProjAlbriteCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+}
+
+void AProjAlbriteCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		if (GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			PlayerUIWidget = CreateWidget<UPlayerUIWidget>(PlayerController, PlayerUIWidgetClass);
+			if (PlayerUIWidget)
+			{
+				PlayerUIWidget->AddToViewport();
+			}
+		}
+	}
+}
+
 void AProjAlbriteCharacter::OnHealthUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const
 {
 	OnHealthChange.Broadcast(OnAttributeChangeData.NewValue);
+}
+
+void AProjAlbriteCharacter::OnShieldUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const
+{
+	OnShieldChange.Broadcast(OnAttributeChangeData.NewValue);
 }
 
 void AProjAlbriteCharacter::Move(const FInputActionValue& Value)

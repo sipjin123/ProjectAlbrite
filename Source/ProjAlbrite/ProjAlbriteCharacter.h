@@ -6,13 +6,15 @@
 #include "GameFramework/Character.h"
 #include "Interfaces/IDamageable.h"
 #include "Enums/GameEnums.h"
-//#include "AlbriteAttributeSet.generated.h"
 #include "AbilitySystemInterface.h"
+#include "CombatUnitWidget.h"
+#include "Components/WidgetComponent.h"
 #include "ActorComponents/AlbriteAbilitySystemComponent.h"
 #include "Enums/StatusTypes.h"
 #include "Interfaces/IAlbriteCharacter.h"
 #include "Logging/LogMacros.h"
 #include "Stats/AlbriteAttributeSet.h"
+#include "Widgets/PlayerUIWidget.h"
 #include "ProjAlbriteCharacter.generated.h"
 
 class USpringArmComponent;
@@ -83,7 +85,7 @@ public:
 	/** Gameplay Ability System */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="GAS", meta = (AllowPrivateAccess="true"))
 	class UAlbriteAbilitySystemComponent* AbilitySystemComponent;
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; };
 	
 	/** Gameplay Attributes */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="GAS", meta = (AllowPrivateAccess="true"))
@@ -122,11 +124,12 @@ protected:
 	void Look(const FInputActionValue& Value);
 			
 protected:
-
+	// Overrides
 	virtual void NotifyControllerChanged() override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
+	
 	/** Reference to the actor component */
 	UPROPERTY(EditAnywhere, Category = "Components")
 	class UStatusActorComponent* StatusActorComponent;
@@ -153,6 +156,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Attribute callbacks")
 	FAttributeChange OnHealthChange;
 	void OnHealthUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Attribute callbacks")
+	FAttributeChange OnShieldChange;
+	void OnShieldUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const;
 
 	/** The statuses this unit has at the moment **/
 	UPROPERTY(BlueprintReadWrite, Category="Combat")
@@ -161,18 +168,35 @@ public:
 	/** Status check **/
 	bool DoesStatusExist(EStatusType StatusType) const { return Statuses.Contains(StatusType); };
 
-	
+	/** Events that are binded in blueprints to listen to **/
 	UPROPERTY(BlueprintAssignable, Category = "Stat callbacks")
 	FInvulnerableChange OnInvulnerableChange;
-	
 	UPROPERTY(BlueprintAssignable, Category = "Stat callbacks")
 	FStunChange OnStunChange;
-	
+
+	/** Function that handles status states based on tags **/
 	void OnInvulnerableTagChanged(FGameplayTag GameplayTag, int NewVal);
 	void OnStunTagChanged(FGameplayTag GameplayTag, int NewVal);
 
+	/** Retrieves status states based on tags **/
 	virtual bool IsStunned_Implementation() override { return AbilitySystemComponent ? AbilitySystemComponent->ComponentHasTag(FName("Status.Stun")) : false; };
 	virtual bool IsInvulnerable_Implementation () override { return AbilitySystemComponent ? AbilitySystemComponent->ComponentHasTag(FName("Status.Invulnerable")) : false; };
 	virtual bool IsUnitDead_Implementation() override { return AttributeSet ? AttributeSet->Health.GetBaseValue() <= 0 : false; };
+
+	/** Widget class for displaying UI on the character screen **/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UPlayerUIWidget> PlayerUIWidgetClass;
+
+	/** Widget direct reference for displaying UI on the character screen **/
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	UPlayerUIWidget* PlayerUIWidget;
+
+	/** Widget Component for displaying UI above the character **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* CombatWidgetComponent;
+	
+	/** Widget direct reference for displaying UI above the character **/
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	UCombatUnitWidget* CombatWidget;
 };
 
