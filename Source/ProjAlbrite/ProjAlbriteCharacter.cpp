@@ -138,6 +138,14 @@ void AProjAlbriteCharacter::BeginPlay()
 	{
 		AttributeSet = AbilitySystemComponent->GetSet<UAlbriteAttributeSet>();
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UAlbriteAttributeSet::GetHealthAttribute()).AddUObject(this, &AProjAlbriteCharacter::OnHealthUpdated);
+
+		AbilitySystemComponent->RegisterGameplayTagEvent(FGameplayTag::RequestGameplayTag(FName("Status.Invulnerable")),
+									  EGameplayTagEventType::NewOrRemoved)
+			.AddUObject(this, &AProjAlbriteCharacter::OnInvulnerableTagChanged);
+		
+		AbilitySystemComponent->RegisterGameplayTagEvent(FGameplayTag::RequestGameplayTag(FName("Status.Stun")),
+									  EGameplayTagEventType::NewOrRemoved)
+			.AddUObject(this, &AProjAlbriteCharacter::OnStunTagChanged);
 	}
 }
 
@@ -236,5 +244,31 @@ void AProjAlbriteCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AProjAlbriteCharacter::OnInvulnerableTagChanged(FGameplayTag GameplayTag, int NewVal)
+{
+	if (HasAuthority())
+	{
+		// To Do: Server Logic Here
+	}
+	else
+	{
+		// Trigger VFX on Client side
+		OnInvulnerableChange.Broadcast(NewVal == 0 ? false : true);
+	}
+}
+
+void AProjAlbriteCharacter::OnStunTagChanged(FGameplayTag GameplayTag, int NewVal)
+{
+	if (HasAuthority())
+	{
+		// To Do: Server Logic Here
+	}
+	else
+	{
+		// Trigger VFX on Client side
+		OnStunChange.Broadcast(NewVal == 0 ? false : true);
 	}
 }

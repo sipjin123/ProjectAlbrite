@@ -8,6 +8,8 @@
 #include "Enums/GameEnums.h"
 //#include "AlbriteAttributeSet.generated.h"
 #include "AbilitySystemInterface.h"
+#include "ActorComponents/AlbriteAbilitySystemComponent.h"
+#include "Enums/StatusTypes.h"
 #include "Interfaces/IAlbriteCharacter.h"
 #include "Logging/LogMacros.h"
 #include "Stats/AlbriteAttributeSet.h"
@@ -21,6 +23,8 @@ struct FInputActionValue;
 
 class UAlbriteBaseGameplayAbility;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInvulnerableChange, bool, InvulnerableValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStunChange, bool, StunValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttributeChange, int, AttributeValue);
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -117,7 +121,6 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 			
-
 protected:
 
 	virtual void NotifyControllerChanged() override;
@@ -143,10 +146,30 @@ public:
 	/** Retrieves The base Attribute for Max Health **/
 	virtual float OnGetMaxHealth_Implementation() override { return AttributeSet ? AttributeSet->MaxHealth.GetBaseValue() : 0.1f; };
 
-	// This callback can be used by the UI.
+	/** This callback can be used by the UI. **/
 	UPROPERTY(BlueprintAssignable, Category = "Attribute callbacks")
 	FAttributeChange OnHealthChange;
-	
 	void OnHealthUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const;
+
+	/** The statuses this unit has at the moment **/
+	UPROPERTY(BlueprintReadWrite, Category="Combat")
+	TSet<EStatusType> Statuses;
+
+	/** Status check **/
+	bool DoesStatusExist(EStatusType StatusType) const { return Statuses.Contains(StatusType); };
+
+	
+	UPROPERTY(BlueprintAssignable, Category = "Stat callbacks")
+	FInvulnerableChange OnInvulnerableChange;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Stat callbacks")
+	FStunChange OnStunChange;
+	
+	void OnInvulnerableTagChanged(FGameplayTag GameplayTag, int NewVal);
+	void OnStunTagChanged(FGameplayTag GameplayTag, int NewVal);
+
+	virtual bool IsStunned_Implementation() override { return AbilitySystemComponent ? AbilitySystemComponent->ComponentHasTag(FName("Status.Stun")) : false; };
+	virtual bool IsInvulnerable_Implementation () override { return AbilitySystemComponent ? AbilitySystemComponent->ComponentHasTag(FName("Status.Invulnerable")) : false; };
+	virtual bool IsUnitDead_Implementation() override { return AttributeSet ? AttributeSet->Health.GetBaseValue() <= 0 : false; };
 };
 

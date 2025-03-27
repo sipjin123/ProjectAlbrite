@@ -25,6 +25,13 @@ public:
 	float OnGetCurrentHealth();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Stats")
 	float OnGetMaxHealth();
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Stats")
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
 	bool IsUnitDead();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+	bool IsInvulnerable();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+	bool IsStunned();
 };
