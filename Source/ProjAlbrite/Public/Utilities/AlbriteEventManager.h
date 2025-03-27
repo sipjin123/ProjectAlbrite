@@ -10,6 +10,8 @@
  * A helper class for custom game events
  * Author: Burlin
  */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnSpawnWorldText, FString, Message, EDebugColor, ColorType, FVector, Location);
 UCLASS(Blueprintable)
 class PROJALBRITE_API UAlbriteEventManager : public UObject
 {
@@ -23,4 +25,9 @@ public:
 private:
 	// Internal instance
 	static UAlbriteEventManager* Instance;
+
+public:
+	// A delegate to be binded using VFX Spawner subsystem in blueprints
+	UPROPERTY(BlueprintAssignable)
+	FOnSpawnWorldText OnSpawnWorldText;
 };

@@ -23,3 +23,13 @@ enum class EAbilityInputID : uint8 {
 	Special = 4		UMETA(DisplayName = "Special"),
 	Ultimate = 5	UMETA(DisplayName = "Ultimate"),
 };
+
+UENUM(BlueprintType)
+enum class EDebugColor : uint8 {
+	None = 0,
+	Blue = 1,
+	Red = 2,
+	Green = 3,
+	Yellow = 4,
+	Black = 5
+};

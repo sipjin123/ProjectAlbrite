@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AlbriteEventManager.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AlbriteBPFunctionLibrary.generated.h"
 
@@ -26,4 +27,10 @@ public:
 	// Retrieves all actors within a radius
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = WorldContextObject))
 	static TArray<AActor*> GetActorsWithinRadius(FVector Origin, float Radius, UObject * WorldContextObject);
+	
+	UFUNCTION(BlueprintCallable, Category = "Events")
+	static void OnSpawnWorldText(FVector Location, EDebugColor ColorType, FString Message)
+	{
+		UAlbriteEventManager::Get()->OnSpawnWorldText.Broadcast(Message, ColorType, Location);
+	}
 };
