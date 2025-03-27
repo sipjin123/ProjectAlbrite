@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Enums/FactionType.h"
 #include "UObject/Interface.h"
 #include "IDamageable.generated.h"
 
@@ -25,6 +26,8 @@ public:
 	float OnGetCurrentHealth();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Stats")
 	float OnGetMaxHealth();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Stats")
+	EFactionType GetFactionType();
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
 	bool IsUnitDead();

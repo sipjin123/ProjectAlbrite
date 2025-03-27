@@ -24,4 +24,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
 	UCharacterMovementComponent* GetCharacterMovementComponent();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
+	ECharacterType GetCharacterType();
 };
