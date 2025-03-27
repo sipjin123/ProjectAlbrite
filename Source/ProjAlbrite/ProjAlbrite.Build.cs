@@ -16,7 +16,7 @@ public class ProjAlbrite : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", 
 			"AIModule", 
 			"UMG",
-			"NavigationSystem",});
+			"NavigationSystem", "GameplayAbilities",});
 		
 		PrivateDependencyModuleNames.AddRange(new string[] 
 		{ 
