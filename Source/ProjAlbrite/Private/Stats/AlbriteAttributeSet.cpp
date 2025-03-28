@@ -25,6 +25,7 @@ void UAlbriteAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME_CONDITION_NOTIFY(UAlbriteAttributeSet, Health, COND_None, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAlbriteAttributeSet, MaxHealth, COND_None, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAlbriteAttributeSet, Shield, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAlbriteAttributeSet, DamageReceived, COND_None, REPNOTIFY_OnChanged);
 }
 
 void UAlbriteAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth)
@@ -40,4 +41,9 @@ void UAlbriteAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldHMax
 void UAlbriteAttributeSet::OnRep_Shield(const FGameplayAttributeData& OldShield)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAlbriteAttributeSet, Shield, OldShield);
+}
+
+void UAlbriteAttributeSet::OnRep_DamageReceived(const FGameplayAttributeData& OldDamageReceived)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAlbriteAttributeSet, DamageReceived, OldDamageReceived);
 }

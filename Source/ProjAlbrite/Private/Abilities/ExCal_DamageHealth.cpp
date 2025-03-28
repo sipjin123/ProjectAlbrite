@@ -9,12 +9,14 @@ struct CombatStatCapture
 	// Declares the relevant variable that will be captured from attribute of a target
 	DECLARE_ATTRIBUTE_CAPTUREDEF(Health);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(Shield);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(DamageReceived);
 
 	CombatStatCapture()
 	{
 		// Defines the relevant variable that will be captured from attribute of a target
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAlbriteAttributeSet, Health, Target, false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAlbriteAttributeSet, Shield, Target, false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAlbriteAttributeSet, DamageReceived, Target, false);
 	}
 };
 
@@ -29,6 +31,7 @@ UExCal_DamageHealth::UExCal_DamageHealth()
 	// Capture relevant variables here in constructor
 	RelevantAttributesToCapture.Add(GetCombatStatCapture().HealthDef);
 	RelevantAttributesToCapture.Add(GetCombatStatCapture().ShieldDef);
+	RelevantAttributesToCapture.Add(GetCombatStatCapture().DamageReceivedDef);
 }
 
 void UExCal_DamageHealth::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
@@ -73,6 +76,7 @@ void UExCal_DamageHealth::Execute_Implementation(const FGameplayEffectCustomExec
 	float NewHealth = FMath::Max(0.0f, CurrentHealth - RemainingDamage);
 
 	// Override the Shield and Health
+	OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(GetCombatStatCapture().DamageReceivedProperty, EGameplayModOp::Override, IncomingDamage));
 	OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(GetCombatStatCapture().ShieldProperty, EGameplayModOp::Override, NewShield));
 	OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(GetCombatStatCapture().HealthProperty, EGameplayModOp::Override, NewHealth));
 }
