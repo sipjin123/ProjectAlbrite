@@ -16,6 +16,7 @@
 #include "ActorComponents/AlbriteAbilitySystemComponent.h"
 #include "ActorComponents/StatusActorComponent.h"
 #include "ActorComponents/VFXActorComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Core/AlbriteGameInstance.h"
 #include "Enums/GameEnums.h"
@@ -74,6 +75,15 @@ AProjAlbriteCharacter::AProjAlbriteCharacter()
 	CombatWidgetComponent->SetWidgetSpace(EWidgetSpace::World); // Set to World Space
 	CombatWidgetComponent->SetDrawSize(FVector2D(100, 10)); // Set UI size
 	CombatWidgetComponent->SetRelativeLocation(FVector(0, 0, 100)); // Position above head
+	
+	FPSArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("FPSArrowComponent"));
+	FPSArrowComponent->SetupAttachment(CameraBoom);
+}
+
+void AProjAlbriteCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, bIsAiming, COND_None, REPNOTIFY_OnChanged);
 }
 
 void AProjAlbriteCharacter::InitializeAbilities()
@@ -103,7 +113,14 @@ void AProjAlbriteCharacter::GrantAbility(TSubclassOf<UAlbriteBaseGameplayAbility
 void AProjAlbriteCharacter::OnAbilityInputPressed(EAbilityInputID InputID)
 {
 	// Request ability cast from server
-	Server_ActivateAbility(InputID);
+	if (InputID == EAbilityInputID::Attack && bIsAiming)
+	{
+		Server_RequestHitScan();
+	}
+	else
+	{
+		Server_ActivateAbility(InputID);
+	}
 }
 
 void AProjAlbriteCharacter::Server_ActivateAbility_Implementation(EAbilityInputID InputID)
@@ -219,6 +236,8 @@ void AProjAlbriteCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(DefenseAction, ETriggerEvent::Started, this, &AProjAlbriteCharacter::OnAbilityInputPressed, EAbilityInputID::Defense);
 		EnhancedInputComponent->BindAction(SpecialAction, ETriggerEvent::Started, this, &AProjAlbriteCharacter::OnAbilityInputPressed, EAbilityInputID::Special);
 		EnhancedInputComponent->BindAction(UltimateAction, ETriggerEvent::Started, this, &AProjAlbriteCharacter::OnAbilityInputPressed, EAbilityInputID::Ultimate);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AProjAlbriteCharacter::OnAimTriggerPressed);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AProjAlbriteCharacter::OnAimTriggerReleased);
 	}
 	else
 	{
@@ -258,10 +277,14 @@ void AProjAlbriteCharacter::OnShieldUpdated(const FOnAttributeChangeData& OnAttr
 	OnShieldChange.Broadcast(OnAttributeChangeData.NewValue);
 }
 
+void AProjAlbriteCharacter::OnRep_IsAiming()
+{
+}
+
 void AProjAlbriteCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
