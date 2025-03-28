@@ -23,6 +23,10 @@ public:
 	UAlbriteAttributeSet();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY(BlueprintReadOnly, Category="Attributes", ReplicatedUsing = OnRep_DamageReceived)
+	FGameplayAttributeData DamageReceived;
+	ATTRIBUTE_ASSESSORS(UAlbriteAttributeSet, DamageReceived);
+	
 	UPROPERTY(BlueprintReadOnly, Category="Attributes", ReplicatedUsing = OnRep_Shield)
 	FGameplayAttributeData Shield;
 	ATTRIBUTE_ASSESSORS(UAlbriteAttributeSet, Shield);
@@ -45,4 +49,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void OnRep_Shield(const FGameplayAttributeData& OldShield);
+	
+	UFUNCTION(BlueprintCallable)
+	void OnRep_DamageReceived(const FGameplayAttributeData& OldDamageReceived);
 };

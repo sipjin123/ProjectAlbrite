@@ -37,4 +37,7 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
 	bool IsStunned();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+	void ApplyFlinch();
 };

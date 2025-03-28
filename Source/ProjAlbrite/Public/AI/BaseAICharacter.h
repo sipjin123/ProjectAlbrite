@@ -52,6 +52,10 @@ public:
 	FAttributeChange OnHealthChange;
 	void OnHealthUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const;
 
+	UPROPERTY(BlueprintAssignable, Category = "Attribute callbacks")
+	FAttributeChange OnShieldChange;
+	void OnShieldUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const;
+	
 	UPROPERTY(BlueprintAssignable, Category = "Stat callbacks")
 	FInvulnerableChange OnInvulnerableChange;
 	
