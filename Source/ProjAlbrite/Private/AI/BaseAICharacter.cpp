@@ -33,6 +33,10 @@ void ABaseAICharacter::BeginPlay()
 		AttributeSet = AbilitySystemComponent->GetSet<UAlbriteAttributeSet>();
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 			UAlbriteAttributeSet::GetHealthAttribute()).AddUObject(this, &ABaseAICharacter::OnHealthUpdated);
+		
+		AttributeSet = AbilitySystemComponent->GetSet<UAlbriteAttributeSet>();
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+			UAlbriteAttributeSet::GetShieldAttribute()).AddUObject(this, &ABaseAICharacter::OnShieldUpdated);
 
 		AbilitySystemComponent->RegisterGameplayTagEvent(
 			FGameplayTag::RequestGameplayTag(FName("Status.Invulnerable")),
@@ -58,6 +62,11 @@ void ABaseAICharacter::Tick(float DeltaTime)
 void ABaseAICharacter::OnHealthUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const
 {
 	OnHealthChange.Broadcast(OnAttributeChangeData.NewValue);
+}
+
+void ABaseAICharacter::OnShieldUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const
+{
+	OnShieldChange.Broadcast(OnAttributeChangeData.NewValue);
 }
 
 void ABaseAICharacter::OnInvulnerableTagChanged(FGameplayTag GameplayTag, int NewVal) const

@@ -178,7 +178,7 @@ void AProjAlbriteCharacter::Server_RequestHitScan_Implementation()
 	HitTarget.Broadcast(OutHitResult.ImpactPoint, ECombatElementType::None);
 
 	// Debug visualization (remove in production)
-	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, 1.0f, 0, .1f);
+	// DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, 1.0f, 0, .1f);
 }
 
 bool AProjAlbriteCharacter::Server_RequestHitScan_Validate()
@@ -371,9 +371,19 @@ void AProjAlbriteCharacter::ApplyDamageToTarget(AActor* Target)
 	// Create an EffectSpecHandle from the EffectClass
 	FGameplayEffectContextHandle EffectContext = TargetASC->MakeEffectContext();
 	EffectContext.AddInstigator(GetOwner(), nullptr);
-
+	
 	FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(BulletDamageEffect, 1, EffectContext);
 
+	float DamageValue = 30.f;
+	
+	// Set the custom magnitude value before applying the effect
+	EffectSpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Combat.Damage")), DamageValue);
+
+	// Apply flinch effect if possible
+	if (Target->GetClass()->ImplementsInterface(UIDamageable::StaticClass()))
+	{
+		IIDamageable::Execute_ApplyFlinch(Target);
+	}
 	if (EffectSpecHandle.IsValid())
 	{
 		// Apply the effect to the target
