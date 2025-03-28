@@ -148,7 +148,7 @@ bool AProjAlbriteCharacter::Server_ActivateAbility_Validate(EAbilityInputID Inpu
 void AProjAlbriteCharacter::Server_RequestHitScan_Implementation()
 {
 	FHitResult OutHitResult;
-	constexpr float TraceDistance = 10000.f;
+	constexpr float TraceDistance = 5000.f;
 	
 	// Get the camera location and forward direction
 	FVector StartLocation;
