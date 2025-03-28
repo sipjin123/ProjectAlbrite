@@ -25,6 +25,8 @@ struct FInputActionValue;
 
 class UAlbriteBaseGameplayAbility;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHitTarget, FVector, Location, ECombatElementType, CEtype);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAimTriggered, bool, IsAim);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInvulnerableChange, bool, InvulnerableValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStunChange, bool, StunValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttributeChange, int, AttributeValue);
@@ -79,6 +81,10 @@ class AProjAlbriteCharacter : public ACharacter, public IAbilitySystemInterface,
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* UltimateAction;
 	
+	/** Aim Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* AimAction;
+	
 public:
 	AProjAlbriteCharacter();
 	
@@ -113,6 +119,14 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_ActivateAbility(EAbilityInputID InputID);
 	
+	/** Server side Hitscan checker to prevent client side cheating **/
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_RequestHitScan();
+
+	/** The hitscan origin adjusted in viewport **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS")
+	UArrowComponent* FPSArrowComponent;
+	
 protected:
 	/** Called for Begin play */
 	virtual void BeginPlay() override;
@@ -122,7 +136,7 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
+
 protected:
 	// Overrides
 	virtual void NotifyControllerChanged() override;
@@ -165,9 +179,30 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category="Combat")
 	TSet<EStatusType> Statuses;
 
+	/** The determines if the unit is aiming **/
+	UPROPERTY(BlueprintReadWrite, Replicated, ReplicatedUsing = OnRep_IsAiming, Category="Combat")
+	bool bIsAiming;
+	UFUNCTION()
+	void OnRep_IsAiming();
+	
+	/** Handles aim control states **/
+	UPROPERTY(BlueprintAssignable, Category="Combat")
+	FOnAimTriggered OnAimTriggered;
+	void OnAimTriggerPressed() { OnAimTriggered.Broadcast(true); };
+	void OnAimTriggerReleased() { OnAimTriggered.Broadcast(false); };
+	
 	/** Status check **/
 	bool DoesStatusExist(EStatusType StatusType) const { return Statuses.Contains(StatusType); };
 
+	void ApplyDamageToTarget(AActor* Target);
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TSubclassOf<UGameplayEffect> BulletDamageEffect;
+	
+	/** Signals that a projectile hits a target **/
+	UPROPERTY(BlueprintAssignable, Category="Combat")
+	FHitTarget HitTarget;
+	
 	/** Events that are binded in blueprints to listen to **/
 	UPROPERTY(BlueprintAssignable, Category = "Stat callbacks")
 	FInvulnerableChange OnInvulnerableChange;
