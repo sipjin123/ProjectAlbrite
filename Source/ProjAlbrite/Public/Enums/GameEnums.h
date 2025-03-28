@@ -22,6 +22,7 @@ enum class EAbilityInputID : uint8 {
 	Defense = 3		UMETA(DisplayName = "Defense"),
 	Special = 4		UMETA(DisplayName = "Special"),
 	Ultimate = 5	UMETA(DisplayName = "Ultimate"),
+	Aim = 6	UMETA(DisplayName = "Aim"),
 };
 
 UENUM(BlueprintType)
@@ -32,4 +33,16 @@ enum class EDebugColor : uint8 {
 	Green = 3,
 	Yellow = 4,
 	Black = 5
+};
+
+UENUM(BlueprintType)
+enum class ECombatElementType : uint8 {
+	None = 0,
+	Fire = 1,
+	Electric = 2,
+	Water = 3,
+	Wind = 4,
+	Acid = 5,
+	Dark = 6,
+	Light = 7,
 };
