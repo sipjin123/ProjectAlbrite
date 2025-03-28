@@ -141,6 +141,49 @@ void AProjAlbriteCharacter::Server_ActivateAbility_Implementation(EAbilityInputI
 
 bool AProjAlbriteCharacter::Server_ActivateAbility_Validate(EAbilityInputID InputID)
 {
+	// To Do: Add validation checkers
+	return true;
+}
+
+void AProjAlbriteCharacter::Server_RequestHitScan_Implementation()
+{
+	FHitResult OutHitResult;
+	constexpr float TraceDistance = 10000.f;
+	
+	// Get the camera location and forward direction
+	FVector StartLocation;
+	FRotator ViewRotation;
+	GetController()->GetPlayerViewPoint(StartLocation, ViewRotation);
+
+	FVector EndLocation = StartLocation + (ViewRotation.Vector() * TraceDistance);
+
+	// Set up collision query parameters
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this); // Ignore the character
+
+	// Perform the line trace
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		OutHitResult, 
+		FPSArrowComponent->GetComponentLocation(), 
+		EndLocation,
+		ECC_Camera,//ECC_Visibility,  // Collision channel
+		TraceParams
+	);
+
+	if (OutHitResult.GetActor())
+	{
+		ApplyDamageToTarget(OutHitResult.GetActor());
+	}
+	
+	HitTarget.Broadcast(OutHitResult.ImpactPoint, ECombatElementType::None);
+
+	// Debug visualization (remove in production)
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, 1.0f, 0, .1f);
+}
+
+bool AProjAlbriteCharacter::Server_RequestHitScan_Validate()
+{
+	// To Do: Add validation checkers
 	return true;
 }
 
@@ -314,6 +357,27 @@ void AProjAlbriteCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AProjAlbriteCharacter::ApplyDamageToTarget(AActor* Target)
+{
+	if (!Target || !BulletDamageEffect) return;
+
+	// Get the target's Ability System Component
+	UAbilitySystemComponent* TargetASC = Target->FindComponentByClass<UAbilitySystemComponent>();
+	if (!TargetASC) return;
+
+	// Create an EffectSpecHandle from the EffectClass
+	FGameplayEffectContextHandle EffectContext = TargetASC->MakeEffectContext();
+	EffectContext.AddInstigator(GetOwner(), nullptr);
+
+	FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(BulletDamageEffect, 1, EffectContext);
+
+	if (EffectSpecHandle.IsValid())
+	{
+		// Apply the effect to the target
+		TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 	}
 }
 
