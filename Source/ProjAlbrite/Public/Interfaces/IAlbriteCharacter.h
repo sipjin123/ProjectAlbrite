@@ -27,4 +27,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
 	ECharacterType GetCharacterType();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
+	void PurgeElementImbue();
 };

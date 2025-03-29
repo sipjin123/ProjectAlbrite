@@ -32,17 +32,21 @@ enum class EDebugColor : uint8 {
 	Red = 2,
 	Green = 3,
 	Yellow = 4,
-	Black = 5
+	Black = 5,
+	BlazeFrost = 6,
+	FrostShock = 7,
+	LightningInferno = 8
 };
 
 UENUM(BlueprintType)
 enum class ECombatElementType : uint8 {
-	None = 0,
-	Fire = 1,
-	Electric = 2,
-	Water = 3,
-	Wind = 4,
-	Acid = 5,
-	Dark = 6,
-	Light = 7,
+	None = 0 UMETA(DisplayName = "None"),
+	Fire = 1 UMETA(DisplayName = "Fire"),
+	Lightning = 2 UMETA(DisplayName = "Lightning"),
+	Water = 3 UMETA(DisplayName = "Water"),
+	Wind = 4 UMETA(DisplayName = "Wind"),
+	Acid = 5 UMETA(DisplayName = "Acid"),
+	Dark = 6 UMETA(DisplayName = "Dark"),
+	Light = 7 UMETA(DisplayName = "Light"),
+	Ice = 8 UMETA(DisplayName = "Ice"),
 };
