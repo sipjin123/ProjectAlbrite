@@ -26,7 +26,7 @@ class PROJALBRITE_API UAlbriteBPFunctionLibrary : public UBlueprintFunctionLibra
 public:
 	// Retrieves all actors within a radius
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = WorldContextObject))
-	static TArray<AActor*> GetActorsWithinRadius(FVector Origin, float Radius, UObject * WorldContextObject);
+	static TArray<AActor*> GetActorsWithinRadius(FVector Origin, float Radius, UObject * WorldContextObject, EFactionType FactionType, bool ShowDebug);
 	
 	UFUNCTION(BlueprintCallable, Category = "Events")
 	static void OnSpawnWorldText(FVector Location, EDebugColor ColorType, FString Message)
