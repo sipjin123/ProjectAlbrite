@@ -78,12 +78,10 @@ void UExCal_DamageHealth::Execute_Implementation(const FGameplayEffectCustomExec
 
 	if (NewHealth <= 0)
 	{
-				UE_LOG(LogTemp, Warning, TEXT("Unit should die"));
 		// Get the Effect Context Handle
 		FGameplayEffectContextHandle ContextHandle = ExecutionParams.GetOwningSpec().GetEffectContext();
 
 		// Get the Source Actor
-		//AActor* SourceActor = Cast<AActor>(ContextHandle.GetOriginalInstigator());
 		AActor* SourceActor = Cast<AActor>(ContextHandle.GetOriginalInstigator());
 		
 		// ✅ Get the Target (Who Received the Effect)
