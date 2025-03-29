@@ -38,6 +38,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="Attributes", ReplicatedUsing = OnRep_MaxHealth)
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ASSESSORS(UAlbriteAttributeSet, MaxHealth);
+	
+	UPROPERTY(BlueprintReadOnly, Category="Attributes", ReplicatedUsing = OnRep_MaxHealth)
+	FGameplayAttributeData Damage;
+	ATTRIBUTE_ASSESSORS(UAlbriteAttributeSet, Damage);
 
 public:
 	
@@ -46,6 +50,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void OnRep_MaxHealth(const FGameplayAttributeData& OldHMaxealth);
+	
+	UFUNCTION(BlueprintCallable)
+	void OnRep_Damage(const FGameplayAttributeData& OldDamage);
 	
 	UFUNCTION(BlueprintCallable)
 	void OnRep_Shield(const FGameplayAttributeData& OldShield);
