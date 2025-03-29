@@ -84,6 +84,7 @@ void AProjAlbriteCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, bIsAiming, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, CurrentElement, COND_None, REPNOTIFY_OnChanged);
 }
 
 void AProjAlbriteCharacter::InitializeAbilities()
@@ -172,7 +173,7 @@ void AProjAlbriteCharacter::Server_RequestHitScan_Implementation()
 
 	if (OutHitResult.GetActor())
 	{
-		ApplyDamageToTarget(OutHitResult.GetActor());
+		ApplyDamageToTarget(OutHitResult.GetActor(), AttributeSet->GetDamage());
 	}
 	
 	HitTarget.Broadcast(OutHitResult.ImpactPoint, ECombatElementType::None);
@@ -219,6 +220,32 @@ void AProjAlbriteCharacter::BeginPlay()
 			FGameplayTag::RequestGameplayTag(FName("Status.Stun")),
 			EGameplayTagEventType::NewOrRemoved)
 			.AddUObject(this, &AProjAlbriteCharacter::OnStunTagChanged);
+
+		// Imbue elements and apply visual indicators in blueprint
+		ECombatElementType Ice = ECombatElementType::Ice;
+		AbilitySystemComponent->RegisterGameplayTagEvent(
+			FGameplayTag::RequestGameplayTag(FName("Imbue.Ice")),
+			EGameplayTagEventType::NewOrRemoved)
+			.AddLambda([this, Ice](const FGameplayTag Tag, int32 NewCount)
+			{
+				OnStatusChanged(Ice, NewCount);
+			});
+		ECombatElementType Fire = ECombatElementType::Fire;
+		AbilitySystemComponent->RegisterGameplayTagEvent(
+			FGameplayTag::RequestGameplayTag(FName("Imbue.Fire")),
+			EGameplayTagEventType::NewOrRemoved)
+			.AddLambda([this, Fire](const FGameplayTag Tag, int32 NewCount)
+			{
+				OnStatusChanged(Fire, NewCount);
+			});
+		ECombatElementType Lightning = ECombatElementType::Lightning;
+		AbilitySystemComponent->RegisterGameplayTagEvent(
+			FGameplayTag::RequestGameplayTag(FName("Imbue.Lightning")),
+			EGameplayTagEventType::NewOrRemoved)
+			.AddLambda([this, Lightning](const FGameplayTag Tag, int32 NewCount)
+			{
+				OnStatusChanged(Lightning, NewCount);
+			});
 	}
 
 	UAlbriteGameInstance* GI = Cast<UAlbriteGameInstance>(GetGameInstance());
@@ -227,6 +254,11 @@ void AProjAlbriteCharacter::BeginPlay()
 		GI->RegisterCharacter(this);
 	}
 	CombatWidget = Cast<UCombatUnitWidget>(CombatWidgetComponent->GetWidget());
+	
+	if (CombatWidget && GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		CombatWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -320,6 +352,21 @@ void AProjAlbriteCharacter::OnShieldUpdated(const FOnAttributeChangeData& OnAttr
 	OnShieldChange.Broadcast(OnAttributeChangeData.NewValue);
 }
 
+void AProjAlbriteCharacter::OnRep_CurrentElement()
+{
+	OnImbueElement.Broadcast(CurrentElement);
+}
+
+void AProjAlbriteCharacter::OnStatusChanged(ECombatElementType ElementType, int32 NewCount)
+{
+	FString ElementString = UEnum::GetDisplayValueAsText(ElementType).ToString();
+
+	if (NewCount > 0 && HasAuthority())
+	{
+		CurrentElement = ElementType;
+	}
+}
+
 void AProjAlbriteCharacter::OnRep_IsAiming()
 {
 }
@@ -360,7 +407,7 @@ void AProjAlbriteCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AProjAlbriteCharacter::ApplyDamageToTarget(AActor* Target)
+void AProjAlbriteCharacter::ApplyDamageToTarget(AActor* Target, float Damage)
 {
 	if (!Target || !BulletDamageEffect) return;
 
@@ -372,22 +419,24 @@ void AProjAlbriteCharacter::ApplyDamageToTarget(AActor* Target)
 	FGameplayEffectContextHandle EffectContext = TargetASC->MakeEffectContext();
 	EffectContext.AddInstigator(GetOwner(), nullptr);
 	
-	FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(BulletDamageEffect, 1, EffectContext);
-
-	float DamageValue = 30.f;
+	float DamageValue = Damage;
 	
-	// Set the custom magnitude value before applying the effect
-	EffectSpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Combat.Damage")), DamageValue);
-
 	// Apply flinch effect if possible
 	if (Target->GetClass()->ImplementsInterface(UIDamageable::StaticClass()))
 	{
 		IIDamageable::Execute_ApplyFlinch(Target);
-	}
-	if (EffectSpecHandle.IsValid())
-	{
-		// Apply the effect to the target
-		TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+		if (!IIDamageable::Execute_IsUnitDead(Target))
+		{
+			FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(BulletDamageEffect, 1, EffectContext);
+			// Set the custom magnitude value before applying the effect
+			EffectSpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Combat.Damage")), DamageValue);
+
+			if (EffectSpecHandle.IsValid())
+			{
+				// Apply the effect to the target
+				TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+			}
+		}
 	}
 }
 

@@ -26,6 +26,7 @@ struct FInputActionValue;
 class UAlbriteBaseGameplayAbility;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHitTarget, FVector, Location, ECombatElementType, CEtype);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnImbueElement, ECombatElementType, ElementType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAimTriggered, bool, IsAim);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInvulnerableChange, bool, InvulnerableValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStunChange, bool, StunValue);
@@ -98,7 +99,7 @@ public:
 	const class UAlbriteAttributeSet* AttributeSet;
 	
 	/** Gameplay Array of Abilities */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="GAS")
+	UPROPERTY(BlueprintReadWrite, Category="GAS")
 	TArray<TSubclassOf<UAlbriteBaseGameplayAbility>> GameplayAbilities;
 
 	/** Initializes Abilities to player */
@@ -179,6 +180,16 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category="Combat")
 	TSet<EStatusType> Statuses;
 
+	/** Handles elemental changes **/
+	UPROPERTY(BlueprintReadWrite, Replicated, ReplicatedUsing = OnRep_CurrentElement, Category="Combat")
+	ECombatElementType CurrentElement;
+	UFUNCTION()
+	void OnRep_CurrentElement();
+	
+	UPROPERTY(BlueprintAssignable, Category="Combat")
+	FOnImbueElement OnImbueElement;
+	void OnStatusChanged(ECombatElementType ElementType, int32 NewCount);
+	
 	/** The determines if the unit is aiming **/
 	UPROPERTY(BlueprintReadWrite, Replicated, ReplicatedUsing = OnRep_IsAiming, Category="Combat")
 	bool bIsAiming;
@@ -194,7 +205,7 @@ public:
 	/** Status check **/
 	bool DoesStatusExist(EStatusType StatusType) const { return Statuses.Contains(StatusType); };
 
-	void ApplyDamageToTarget(AActor* Target);
+	void ApplyDamageToTarget(AActor* Target, float Damage);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TSubclassOf<UGameplayEffect> BulletDamageEffect;
@@ -233,5 +244,7 @@ public:
 	/** Widget direct reference for displaying UI above the character **/
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	UCombatUnitWidget* CombatWidget;
+
+	virtual bool IsAlliedUnit_Implementation() override { return true; };
 };
 
