@@ -49,6 +49,16 @@ void UAlbriteAbilitySystemComponent::LogTags(UAbilitySystemComponent* AbilitySys
 	}
 }
 
+void UAlbriteAbilitySystemComponent::Server_ApplyCooldownByTag_Implementation(const FGameplayTag TagToUse)
+{
+	Client_ApplyCooldownByTag_Implementation(TagToUse);
+}
+
+void UAlbriteAbilitySystemComponent::Client_ApplyCooldownByTag_Implementation(const FGameplayTag TagToUse)
+{
+	AddLooseGameplayTag(TagToUse);
+}
+
 void UAlbriteAbilitySystemComponent::Multicast_NotifyTagsRemoved_Implementation(UAbilitySystemComponent* AbilitySystemComponent, const TArray<FGameplayTag>& TagsToRemove)
 {
 	if (!AbilitySystemComponent) return;

@@ -30,4 +30,7 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
 	void PurgeElementImbue();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
+	void ApplyCooldown(TSubclassOf<UGameplayEffect> EffectClass, EAbilityInputID AbilityUsed);
 };

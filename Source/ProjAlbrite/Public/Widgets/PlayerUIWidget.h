@@ -3,12 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActorComponents/AlbriteAbilitySystemComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Enums/GameEnums.h"
 #include "PlayerUIWidget.generated.h"
 
 /**
  * 
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCooldownTriggered, float, Duration, EAbilityInputID, AbilityId);
 UCLASS()
 class PROJALBRITE_API UPlayerUIWidget : public UUserWidget
 {
@@ -26,4 +29,19 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UHorizontalBox* StatusContainer;
+	
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UProgressBar* SpecialAtkBar;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UProgressBar* DefenseBar;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UProgressBar* UltimateBar;
+
+	void OnTagChanged(const FGameplayTag Tag, int32 NewCount);
+
+	/* Notifies widget blueprint a cooldown is triggered */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FCooldownTriggered CooldownTriggered;
+
+	UAlbriteAbilitySystemComponent* AbilitySystemComponent;
 };

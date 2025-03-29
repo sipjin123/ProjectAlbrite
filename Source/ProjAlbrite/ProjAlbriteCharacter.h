@@ -246,5 +246,20 @@ public:
 	UCombatUnitWidget* CombatWidget;
 
 	virtual bool IsAlliedUnit_Implementation() override { return true; };
+
+	/** Notifies client from the server side cooldown effect **/
+	virtual void ApplyCooldown_Implementation(TSubclassOf<UGameplayEffect> EffectClass, EAbilityInputID AbilityUsed);
+
+	/** Applies the client side cooldown effect **/
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ServerApplyCooldown(TSubclassOf<UGameplayEffect> EffectClass, EAbilityInputID AbilityUsed);
+	
+	/** Applies the client side cooldown effect **/
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void ClientApplyCooldown(float Duration, EAbilityInputID AbilityUsed);
+	
+	/* Notifies widget blueprint a cooldown is triggered */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FCooldownTriggered CooldownTriggered;
 };
 

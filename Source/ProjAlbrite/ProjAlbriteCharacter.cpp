@@ -465,3 +465,38 @@ void AProjAlbriteCharacter::OnStunTagChanged(FGameplayTag GameplayTag, int NewVa
 		OnStunChange.Broadcast(NewVal == 0 ? false : true);
 	}
 }
+
+void AProjAlbriteCharacter::ApplyCooldown_Implementation(TSubclassOf<UGameplayEffect> EffectClass, EAbilityInputID AbilityUsed)
+{
+	// Only apply on the server
+	if (EffectClass && HasAuthority())
+	{
+		ServerApplyCooldown(EffectClass, AbilityUsed);
+	}
+}
+
+void AProjAlbriteCharacter::ServerApplyCooldown_Implementation(TSubclassOf<UGameplayEffect> EffectClass, EAbilityInputID AbilityUsed)
+{
+	if (EffectClass && HasAuthority())
+	{
+		// Apply effect
+		const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(EffectClass, 1.f, AbilitySystemComponent->MakeEffectContext());
+		if (SpecHandle.IsValid())
+		{
+			const FActiveGameplayEffectHandle ActiveEffectHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+
+			// Get duration from the applied effect
+			const FActiveGameplayEffect* ActiveEffect = AbilitySystemComponent->GetActiveGameplayEffect(ActiveEffectHandle);
+			if (ActiveEffect)
+			{
+				float Duration = ActiveEffect->GetDuration();
+				ClientApplyCooldown(Duration, AbilityUsed);
+			}
+		}
+	}
+}
+
+void AProjAlbriteCharacter::ClientApplyCooldown_Implementation(float Duration, EAbilityInputID AbilityUsed)
+{
+	CooldownTriggered.Broadcast(Duration, AbilityUsed);
+}

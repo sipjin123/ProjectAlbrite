@@ -25,4 +25,10 @@ class PROJALBRITE_API UAlbriteAbilitySystemComponent : public UAbilitySystemComp
 
 	UFUNCTION(BlueprintCallable)
 	void LogTags(UAbilitySystemComponent* AbilitySystemComponent);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void Server_ApplyCooldownByTag(const FGameplayTag TagToUse);
+
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void Client_ApplyCooldownByTag(const FGameplayTag TagToUse);
 };
