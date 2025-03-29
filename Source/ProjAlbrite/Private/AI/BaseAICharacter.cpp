@@ -3,6 +3,8 @@
 
 #include "AI/BaseAICharacter.h"
 
+#include "Net/UnrealNetwork.h"
+
 // Sets default values
 ABaseAICharacter::ABaseAICharacter()
 {
@@ -57,6 +59,16 @@ void ABaseAICharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ABaseAICharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME_CONDITION_NOTIFY(ABaseAICharacter, IsDead, COND_None, REPNOTIFY_OnChanged);
+}
+
+void ABaseAICharacter::OnRep_IsDead()
+{
 }
 
 void ABaseAICharacter::OnHealthUpdated(const FOnAttributeChangeData& OnAttributeChangeData) const

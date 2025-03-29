@@ -2,9 +2,12 @@
 
 
 #include "Utilities/AlbriteBPFunctionLibrary.h"
+#include "AI/BaseAICharacter.h"
 #include "Engine/OverlapResult.h"
+#include "Enums/FactionType.h"
 #include "GameFramework/Character.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "ProjAlbrite/ProjAlbriteCharacter.h"
 
 UAlbriteBPFunctionLibrary::UAlbriteBPFunctionLibrary(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -13,7 +16,7 @@ UAlbriteBPFunctionLibrary::UAlbriteBPFunctionLibrary(const FObjectInitializer& O
 }
 
 TArray<AActor*> UAlbriteBPFunctionLibrary::GetActorsWithinRadius(FVector Origin, float Radius,
-	UObject* WorldContextObject)
+	UObject* WorldContextObject, EFactionType FactionType, bool ShowDebug)
 {
 	const UWorld * world = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::Assert);
 	TArray<AActor*> OutActors;
@@ -36,8 +39,11 @@ TArray<AActor*> UAlbriteBPFunctionLibrary::GetActorsWithinRadius(FVector Origin,
 	);
 
 	// Draw debug sphere (DEBUG)
-	DrawDebugSphere(world, Origin, Radius, 16, FColor::Green, false, 2.0f);
-
+	if(ShowDebug)
+	{
+		DrawDebugSphere(world, Origin, Radius, 16, FColor::Green, false, 2.0f);
+	}
+	
 	// Use a set to track unique actors
 	TSet<AActor*> UnitsHit;
 	
@@ -47,9 +53,21 @@ TArray<AActor*> UAlbriteBPFunctionLibrary::GetActorsWithinRadius(FVector Origin,
 		for (const FOverlapResult& Result : OverlapResults)
 		{
 			AActor* DetectedActor = Result.GetActor();
-			if (DetectedActor->IsA(ACharacter::StaticClass()) && !UnitsHit.Contains(DetectedActor))
+
+			// Filter actors here
+			bool IsValidActorHit =
+					FactionType == EFactionType::Heroes && DetectedActor->IsA(AProjAlbriteCharacter::StaticClass()) || 
+					FactionType == EFactionType::Enemies && DetectedActor->IsA(ABaseAICharacter::StaticClass()) ||
+					FactionType == EFactionType::None && DetectedActor->IsA(ACharacter::StaticClass());
+
+			// Check validity and prevent duplicates
+			if (IsValidActorHit && !UnitsHit.Contains(DetectedActor))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Enemy detected: %s"), *DetectedActor->GetName());
+				if(ShowDebug)
+				{
+					// Log Collision (DEBUG)
+					UE_LOG(LogTemp, Warning, TEXT("Enemy detected: %s"), *DetectedActor->GetName());
+				}
 				UnitsHit.Add(DetectedActor);
 			}
 		}

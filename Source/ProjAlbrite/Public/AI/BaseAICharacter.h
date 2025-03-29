@@ -47,6 +47,12 @@ public:
 	/** Retrieves The base Attribute for Max Health **/
 	virtual float OnGetMaxHealth_Implementation() override { return AttributeSet ? AttributeSet->MaxHealth.GetBaseValue() : 0.1f; };
 
+	/** The determines if the unit is dead **/
+	UPROPERTY(BlueprintReadWrite, Replicated, ReplicatedUsing = OnRep_IsDead, Category="Combat")
+	bool IsDead;
+	UFUNCTION()
+	void OnRep_IsDead();
+	
 	/** This callback can be used by the UI. **/
 	UPROPERTY(BlueprintAssignable, Category = "Attribute callbacks")
 	FAttributeChange OnHealthChange;
@@ -68,7 +74,6 @@ public:
 	virtual bool IsStunned_Implementation() override { return AbilitySystemComponent ? AbilitySystemComponent->ComponentHasTag(FName("Status.Stun")) : false; };
 	virtual bool IsInvulnerable_Implementation () override { return AbilitySystemComponent ? AbilitySystemComponent->ComponentHasTag(FName("Status.Invulnerable")) : false; };
 	virtual bool IsUnitDead_Implementation() override { return AttributeSet ? AttributeSet->Health.GetBaseValue() <= 0 : false; };
-
 	
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	UCombatUnitWidget* CombatWidget;
@@ -76,4 +81,6 @@ public:
 	/** Widget Component for displaying UI above the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* CombatWidgetComponent;
+
+	virtual bool IsEnemyUnit_Implementation() override { return true; };
 };
