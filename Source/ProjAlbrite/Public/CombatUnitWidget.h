@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActorComponents/AlbriteAbilitySystemComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Enums/GameEnums.h"
 #include "CombatUnitWidget.generated.h"
 
 /**
@@ -26,4 +28,16 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UHorizontalBox* StatusContainer;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class USizeBox* FireElementStatus;
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class USizeBox* LightningElementStatus;
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class USizeBox* IceElementStatus;
+
+	UFUNCTION(BlueprintCallable)
+	void RegisterStatusBinding(UAlbriteAbilitySystemComponent* AbilityComponent);
+
+	void OnStatusChanged(ECombatElementType ElementType, int32 NewCount);
 };
