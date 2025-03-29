@@ -3,6 +3,7 @@
 
 #include "Abilities/ExCal_DamageHealth.h"
 #include "Stats/AlbriteAttributeSet.h"
+#include "Subsystems/StatSubsystem.h"
 
 struct CombatStatCapture
 {
@@ -74,6 +75,31 @@ void UExCal_DamageHealth::Execute_Implementation(const FGameplayEffectCustomExec
 
 	// Compute final health after shield is broken
 	float NewHealth = FMath::Max(0.0f, CurrentHealth - RemainingDamage);
+
+	if (NewHealth <= 0)
+	{
+				UE_LOG(LogTemp, Warning, TEXT("Unit should die"));
+		// Get the Effect Context Handle
+		FGameplayEffectContextHandle ContextHandle = ExecutionParams.GetOwningSpec().GetEffectContext();
+
+		// Get the Source Actor
+		//AActor* SourceActor = Cast<AActor>(ContextHandle.GetOriginalInstigator());
+		AActor* SourceActor = Cast<AActor>(ContextHandle.GetOriginalInstigator());
+		
+		// ✅ Get the Target (Who Received the Effect)
+		AActor* TargetActor = Cast<AActor>(ExecutionParams.GetTargetAbilitySystemComponent()->GetAvatarActor());
+		
+		if (SourceActor && TargetActor)
+		{
+			UWorld* World = SourceActor->GetWorld();
+			UGameInstance* GameInstance = World->GetGameInstance();
+			UStatSubsystem* MySubsystem = GameInstance->GetSubsystem<UStatSubsystem>();
+			if(MySubsystem)
+			{
+				MySubsystem->KilledTarget.Broadcast(TargetActor, SourceActor);
+			}
+		}
+	}
 
 	// Override the Shield and Health
 	OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(GetCombatStatCapture().DamageReceivedProperty, EGameplayModOp::Override, IncomingDamage));
