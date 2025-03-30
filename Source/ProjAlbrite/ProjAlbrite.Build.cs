@@ -24,5 +24,7 @@ public class ProjAlbrite : ModuleRules
 			"GameplayTags", 
 			"GameplayTasks" 
 		});
+		
+		PublicDependencyModuleNames.AddRange(new string[] { "Sockets", "Networking" });
 	}
 }

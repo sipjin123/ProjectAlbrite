@@ -19,10 +19,24 @@ public:
 	// Cached reference to all Characters
 	UPROPERTY(BlueprintReadWrite, Category="Players")
 	TSet<AProjAlbriteCharacter*> Characters;
-	
+
+	// Returns the array of characters
 	UFUNCTION(BlueprintCallable, Category="Players")
 	TArray<AProjAlbriteCharacter*> GetCharacters() const { return Characters.Array(); };
 
+	// Registers the character to the TSet
 	UFUNCTION(BlueprintCallable, Category="Players")
 	void RegisterCharacter(AProjAlbriteCharacter* NewChar) { Characters.Add(NewChar); };
+
+	// Joins the lobby of the host through server address
+	UFUNCTION(Client, Reliable)
+	void ClientJoinHostLobby(const FString& ServerAddress);
+
+	// Returns the local IP
+	UFUNCTION(BlueprintCallable)
+	FString GetLocalIPAddress();
+
+	// The current Hero the user selected in the loadout
+	UPROPERTY(BlueprintReadWrite)
+	ECharacterType HeroSelected;
 };
