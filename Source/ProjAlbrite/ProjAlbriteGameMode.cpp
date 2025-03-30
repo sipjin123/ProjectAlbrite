@@ -29,7 +29,7 @@ void AProjAlbriteGameMode::PostLogin(APlayerController* NewPlayerController)
 	if (GetNetMode() == NM_ListenServer)
 	{
 		// Check if this joining player is the listen server host
-		if (NewPlayerController->IsLocalController() || bIsAutoSpawn) 
+		if (NewPlayerController->IsLocalController() && !bIsAutoSpawn) 
 		{
 			UE_LOG(LogTemp, Warning, TEXT("The joining player is the host!"));
 			NewPlayerController->SetShowMouseCursor(false);
