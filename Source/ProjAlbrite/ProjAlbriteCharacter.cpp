@@ -85,6 +85,8 @@ void AProjAlbriteCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, bIsAiming, COND_None, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, CurrentElement, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, CharacterType, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, bIsDead, COND_None, REPNOTIFY_OnChanged);
 }
 
 void AProjAlbriteCharacter::InitializeAbilities()
@@ -113,6 +115,8 @@ void AProjAlbriteCharacter::GrantAbility(TSubclassOf<UAlbriteBaseGameplayAbility
 
 void AProjAlbriteCharacter::OnAbilityInputPressed(EAbilityInputID InputID)
 {
+	if (bIsDead) return;
+	
 	// Request ability cast from server
 	if (InputID == EAbilityInputID::Attack && bIsAiming)
 	{
@@ -162,10 +166,12 @@ void AProjAlbriteCharacter::Server_RequestHitScan_Implementation()
 	FCollisionQueryParams TraceParams;
 	TraceParams.AddIgnoredActor(this); // Ignore the character
 
+	FVector OffsetProjectileOrigin = FPSArrowComponent->GetComponentLocation()  + (FPSArrowComponent->GetForwardVector() * 250.f);
+	
 	// Perform the line trace
 	bool bHit = GetWorld()->LineTraceSingleByChannel(
 		OutHitResult, 
-		FPSArrowComponent->GetComponentLocation(), 
+		OffsetProjectileOrigin, 
 		EndLocation,
 		ECC_Camera,//ECC_Visibility,  // Collision channel
 		TraceParams
@@ -373,6 +379,8 @@ void AProjAlbriteCharacter::OnRep_IsAiming()
 
 void AProjAlbriteCharacter::Move(const FInputActionValue& Value)
 {
+	if (bIsDead) return;
+	
 	// input is a Vector2D
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -396,6 +404,8 @@ void AProjAlbriteCharacter::Move(const FInputActionValue& Value)
 
 void AProjAlbriteCharacter::Look(const FInputActionValue& Value)
 {
+	if (bIsDead) return;
+	
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 

@@ -144,7 +144,7 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
-	
+
 	/** Reference to the actor component */
 	UPROPERTY(EditAnywhere, Category = "Components")
 	class UStatusActorComponent* StatusActorComponent;
@@ -189,6 +189,14 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Combat")
 	FOnImbueElement OnImbueElement;
 	void OnStatusChanged(ECombatElementType ElementType, int32 NewCount);
+	
+	/** The determines the character type **/
+	UPROPERTY(BlueprintReadWrite, Replicated, Category="Stat")
+	ECharacterType CharacterType;
+	
+	/** The determines if the unit is Dead **/
+	UPROPERTY(BlueprintReadWrite, Replicated, Category="Stat")
+	bool bIsDead;
 	
 	/** The determines if the unit is aiming **/
 	UPROPERTY(BlueprintReadWrite, Replicated, ReplicatedUsing = OnRep_IsAiming, Category="Combat")
