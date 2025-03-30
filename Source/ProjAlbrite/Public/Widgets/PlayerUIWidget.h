@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "ActorComponents/AlbriteAbilitySystemComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
 #include "Enums/GameEnums.h"
 #include "PlayerUIWidget.generated.h"
 
@@ -26,6 +27,11 @@ public:
 	class UProgressBar* HealthBar;
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UProgressBar* ShieldBar;
+	
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UTextBlock* XPText;
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UTextBlock* LevelText;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UHorizontalBox* StatusContainer;

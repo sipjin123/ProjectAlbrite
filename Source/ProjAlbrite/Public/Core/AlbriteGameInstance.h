@@ -38,5 +38,5 @@ public:
 
 	// The current Hero the user selected in the loadout
 	UPROPERTY(BlueprintReadWrite)
-	ECharacterType HeroSelected;
+	ECharacterType HeroSelected = ECharacterType::Vanguard;
 };
