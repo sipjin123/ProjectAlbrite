@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AlbriteEventManager.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Player/AlbritePlayerState.h"
 #include "AlbriteBPFunctionLibrary.generated.h"
 
 /**
@@ -32,5 +33,11 @@ public:
 	static void OnSpawnWorldText(FVector Location, EDebugColor ColorType, FString Message)
 	{
 		UAlbriteEventManager::Get()->OnSpawnWorldText.Broadcast(Message, ColorType, Location);
+	}
+	
+	static int UpdateLevelByXP(int CurrentXP)
+	{
+		const int NewLevel = CurrentXP / AAlbritePlayerState::XPPerKill;
+		return FMath::Clamp(NewLevel, 1, 100);
 	}
 };

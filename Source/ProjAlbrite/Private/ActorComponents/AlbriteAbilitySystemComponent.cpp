@@ -6,6 +6,13 @@
 void UAlbriteAbilitySystemComponent::NotifyAbilityActivated(const FGameplayAbilitySpecHandle Handle,
 	UGameplayAbility* Ability)
 {
+	bool NewVal = HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Status.Invulnerable")));
+	if (GetOwner()->HasAuthority())
+	{
+		// Do logic here for when invulnerability ends
+		// UE_LOG(LogTemp, Warning, TEXT("An Ability has Ended! %d"), NewVal ? 1 : 0);
+	}
+	
 	Super::NotifyAbilityActivated(Handle, Ability);
 }
 
