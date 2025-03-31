@@ -20,6 +20,15 @@ UAlbriteAttributeSet::UAlbriteAttributeSet()
 	Damage.SetCurrentValue(10.f);
 }
 
+void UAlbriteAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
+{
+	Super::PreAttributeChange(Attribute, NewValue);
+	if (Attribute == GetShieldAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.0f, 100);
+	}
+}
+
 void UAlbriteAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

@@ -21,6 +21,8 @@ class PROJALBRITE_API UAlbriteAttributeSet : public UAttributeSet
 public:
 	
 	UAlbriteAttributeSet();
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(BlueprintReadOnly, Category="Attributes", ReplicatedUsing = OnRep_DamageReceived)
@@ -30,7 +32,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="Attributes", ReplicatedUsing = OnRep_Shield)
 	FGameplayAttributeData Shield;
 	ATTRIBUTE_ASSESSORS(UAlbriteAttributeSet, Shield);
-
+	
 	UPROPERTY(BlueprintReadOnly, Category="Attributes", ReplicatedUsing = OnRep_Health)
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ASSESSORS(UAlbriteAttributeSet, Health);
