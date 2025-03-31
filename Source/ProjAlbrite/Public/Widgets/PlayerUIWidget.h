@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
 #include "Enums/GameEnums.h"
+#include "Player/AlbritePlayerState.h"
 #include "PlayerUIWidget.generated.h"
 
 /**
@@ -27,15 +28,19 @@ public:
 	class UProgressBar* HealthBar;
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UProgressBar* ShieldBar;
-	
+
+	/** Widget stat display **/
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UTextBlock* XPText;
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UTextBlock* LevelText;
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UTextBlock* KillsText;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UHorizontalBox* StatusContainer;
-	
+
+	/** Cooldown progress bars **/
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UProgressBar* SpecialAtkBar;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -43,11 +48,22 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UProgressBar* UltimateBar;
 
+	/** Determines if imbue element tag has triggered **/
 	void OnTagChanged(const FGameplayTag Tag, int32 NewCount);
 
-	/* Notifies widget blueprint a cooldown is triggered */
+	/** Notifies widget blueprint a cooldown is triggered **/
 	UPROPERTY(BlueprintCallable, BlueprintAssignable)
 	FCooldownTriggered CooldownTriggered;
 
+	/* References ability component */
 	UAlbriteAbilitySystemComponent* AbilitySystemComponent;
+
+	/** Binding functions **/
+	void BindPlayerStats(AAlbritePlayerState* PlayerState);
+	UFUNCTION()
+	void UpdateLevelText(int32 AddedLevel);
+	UFUNCTION()
+	void UpdateXPText(int32 AddedXP);
+	UFUNCTION()
+	void UpdateKillsText(int32 AddedKills);
 };
