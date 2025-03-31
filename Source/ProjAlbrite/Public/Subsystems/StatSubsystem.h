@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EnemySubsystem.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "StatSubsystem.generated.h"
 
@@ -28,4 +29,10 @@ protected:
 public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable)
 	FKilledTarget KilledTarget;
+
+	UFUNCTION(BlueprintCallable)
+	UWorld* GetMyWorld();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UEnemySubsystem* GetEnemySubsystem();
 };
