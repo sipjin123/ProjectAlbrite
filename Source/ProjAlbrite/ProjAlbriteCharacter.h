@@ -13,6 +13,7 @@
 #include "Enums/StatusTypes.h"
 #include "Interfaces/IAlbriteCharacter.h"
 #include "Logging/LogMacros.h"
+#include "Player/AlbritePlayerState.h"
 #include "Stats/AlbriteAttributeSet.h"
 #include "Widgets/PlayerUIWidget.h"
 #include "ProjAlbriteCharacter.generated.h"
@@ -269,5 +270,17 @@ public:
 	/* Notifies widget blueprint a cooldown is triggered */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable)
 	FCooldownTriggered CooldownTriggered;
+
+	/* Reference to the state for fetching relevant info */
+	UPROPERTY(BlueprintReadWrite, Category="Stats")
+	AAlbritePlayerState* CustomPlayerState;
+
+	virtual float GetDamage_Implementation() override { return AttributeSet ? AttributeSet->GetDamage() : 1; };
+	virtual float GetDamageBasedOnLevel_Implementation() override
+	{
+		return AttributeSet
+			? AttributeSet->Damage.GetCurrentValue() + ((CustomPlayerState ? CustomPlayerState->CurrentLevel : 1) / 5.f)
+			: 1;
+	};
 };
 

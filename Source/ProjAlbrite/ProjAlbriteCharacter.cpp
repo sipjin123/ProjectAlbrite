@@ -179,7 +179,22 @@ void AProjAlbriteCharacter::Server_RequestHitScan_Implementation()
 
 	if (OutHitResult.GetActor())
 	{
-		ApplyDamageToTarget(OutHitResult.GetActor(), AttributeSet->GetDamage());
+		if (!CustomPlayerState)
+		{
+			CustomPlayerState = Cast<AAlbritePlayerState>(GetPlayerState());
+		}
+		if (OutHitResult.GetActor()->GetClass()->ImplementsInterface(UIDamageable::StaticClass()))
+		{
+			bool IsAlly = IIDamageable::Execute_IsAlliedUnit(OutHitResult.GetActor());
+			if (IsAlly)
+			{
+				// Do some logic here if target was an ally
+			}
+			else
+			{
+				ApplyDamageToTarget(OutHitResult.GetActor(), GetDamageBasedOnLevel_Implementation() * .75f);
+			}
+		}
 	}
 	
 	HitTarget.Broadcast(OutHitResult.ImpactPoint, ECombatElementType::None);
@@ -265,6 +280,11 @@ void AProjAlbriteCharacter::BeginPlay()
 	{
 		CombatWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
+	
+	if (!CustomPlayerState)
+	{
+		CustomPlayerState = Cast<AAlbritePlayerState>(GetPlayerState());
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -334,14 +354,19 @@ void AProjAlbriteCharacter::PossessedBy(AController* NewController)
 void AProjAlbriteCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
-
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	CustomPlayerState = Cast<AAlbritePlayerState>(GetPlayerState());
+	
+	if (GetLocalRole() == ROLE_AutonomousProxy)
 	{
-		if (GetLocalRole() == ROLE_AutonomousProxy)
+		if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 		{
 			PlayerUIWidget = CreateWidget<UPlayerUIWidget>(PlayerController, PlayerUIWidgetClass);
 			if (PlayerUIWidget)
 			{
+				if (CustomPlayerState)
+				{
+					PlayerUIWidget->BindPlayerStats(CustomPlayerState);
+				}
 				PlayerUIWidget->AddToViewport();
 			}
 		}
@@ -428,8 +453,8 @@ void AProjAlbriteCharacter::ApplyDamageToTarget(AActor* Target, float Damage)
 	// Create an EffectSpecHandle from the EffectClass
 	FGameplayEffectContextHandle EffectContext = TargetASC->MakeEffectContext();
 	EffectContext.AddInstigator(GetOwner(), nullptr);
-	
-	float DamageValue = Damage;
+
+	const float DamageValue = Damage;
 	
 	// Apply flinch effect if possible
 	if (Target->GetClass()->ImplementsInterface(UIDamageable::StaticClass()))
