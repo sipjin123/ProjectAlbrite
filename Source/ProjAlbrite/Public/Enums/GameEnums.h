@@ -8,7 +8,7 @@
 UENUM(BlueprintType)
 enum class ECharacterType : uint8 {
 	None = 0			UMETA(DisplayName = "None"),
-	Vanguard = 1		UMETA(DisplayName = "Default"),
+	Vanguard = 1		UMETA(DisplayName = "Vanguard"),
 	Rogue = 2			UMETA(DisplayName = "Rogue"),
 	Alchemist = 3		UMETA(DisplayName = "Alchemist"),
 	Engineer = 4		UMETA(DisplayName = "Engineer"),
