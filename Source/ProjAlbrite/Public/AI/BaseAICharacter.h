@@ -83,4 +83,6 @@ public:
 	UWidgetComponent* CombatWidgetComponent;
 
 	virtual bool IsEnemyUnit_Implementation() override { return true; };
+
+	virtual float GetDamage_Implementation() override { return AttributeSet ? AttributeSet->Damage.GetCurrentValue() : 1; };
 };
