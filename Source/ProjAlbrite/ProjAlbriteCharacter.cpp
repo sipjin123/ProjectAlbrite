@@ -586,13 +586,13 @@ void AProjAlbriteCharacter::ServerApplyCooldown_Implementation(TSubclassOf<UGame
 			if (ActiveEffect)
 			{
 				float Duration = ActiveEffect->GetDuration();
-				ClientApplyCooldown(Duration, AbilityUsed);
+				ClientApplyCooldown(Duration, AbilityUsed, FDateTime::Now());
 			}
 		}
 	}
 }
 
-void AProjAlbriteCharacter::ClientApplyCooldown_Implementation(float Duration, EAbilityInputID AbilityUsed)
+void AProjAlbriteCharacter::ClientApplyCooldown_Implementation(float Duration, EAbilityInputID AbilityUsed, FDateTime DateCasted)
 {
-	CooldownTriggered.Broadcast(Duration, AbilityUsed);
+	CooldownTriggered.Broadcast(Duration, AbilityUsed, DateCasted);
 }

@@ -13,7 +13,7 @@
 /**
  * 
  */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCooldownTriggered, float, Duration, EAbilityInputID, AbilityId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCooldownTriggered, float, Duration, EAbilityInputID, AbilityId, FDateTime, DateCasted);
 UCLASS()
 class PROJALBRITE_API UPlayerUIWidget : public UUserWidget
 {

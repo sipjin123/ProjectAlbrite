@@ -41,6 +41,9 @@ public:
 	bool GetIsComboActive();
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
+	bool GetIsAiming();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
 	void TriggerAbilityCam();
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")

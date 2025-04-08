@@ -285,7 +285,7 @@ public:
 	
 	/** Applies the client side cooldown effect **/
 	UFUNCTION(Client, Reliable, BlueprintCallable)
-	void ClientApplyCooldown(float Duration, EAbilityInputID AbilityUsed);
+	void ClientApplyCooldown(float Duration, EAbilityInputID AbilityUsed, FDateTime DateCasted);
 	
 	/* Notifies widget blueprint a cooldown is triggered */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable)
@@ -307,5 +307,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FTriggerAbilityCam TriggerAbilityCam;
 	virtual void TriggerAbilityCam_Implementation() override;
+
+	virtual bool GetIsAiming_Implementation() override { return bIsAiming; };
 };
 
