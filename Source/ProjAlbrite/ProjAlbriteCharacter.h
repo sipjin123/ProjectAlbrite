@@ -29,8 +29,10 @@ class UAlbriteBaseGameplayAbility;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHitTarget, FVector, Location, ECombatElementType, CEtype);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnImbueElement, ECombatElementType, ElementType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAimTriggered, bool, IsAim);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnComboWindowActive, bool, IsActive);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInvulnerableChange, bool, InvulnerableValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStunChange, bool, StunValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTriggerAbilityCam);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttributeChange, int, AttributeValue);
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -139,6 +141,9 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	/** Called for tick logic */
+	virtual void Tick(float DeltaSeconds) override;
+	
 protected:
 	// Overrides
 	virtual void NotifyControllerChanged() override;
@@ -199,6 +204,20 @@ public:
 	UPROPERTY(BlueprintReadWrite, Replicated, Category="Stat")
 	bool bIsDead;
 	
+	/** The determines if the unit is Casting **/
+	UPROPERTY(BlueprintReadWrite, Replicated, Category="Stat")
+	bool bIsCasting;
+	
+	/** The determines if the unit can do a combo **/
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Combat")
+	FOnComboWindowActive OnComboWindowActive;
+	UPROPERTY(BlueprintReadWrite, Replicated, ReplicatedUsing = OnRep_IsComboWindowActive, Category="Combat")
+	bool bIsComboWindowActive;
+	UFUNCTION()
+	void OnRep_IsComboWindowActive();
+	virtual void ToggleComboWindow_Implementation(bool IsActive) override;
+	virtual bool GetIsComboActive_Implementation() override { return bIsComboWindowActive; };
+	
 	/** The determines if the unit is aiming **/
 	UPROPERTY(BlueprintReadWrite, Replicated, ReplicatedUsing = OnRep_IsAiming, Category="Combat")
 	bool bIsAiming;
@@ -232,6 +251,7 @@ public:
 	/** Function that handles status states based on tags **/
 	void OnInvulnerableTagChanged(FGameplayTag GameplayTag, int NewVal);
 	void OnStunTagChanged(FGameplayTag GameplayTag, int NewVal);
+	void OnComboTagChanged(FGameplayTag GameplayTag, int NewVal);
 
 	/** Retrieves status states based on tags **/
 	virtual bool IsStunned_Implementation() override { return AbilitySystemComponent ? AbilitySystemComponent->ComponentHasTag(FName("Status.Stun")) : false; };
@@ -282,5 +302,10 @@ public:
 			? AttributeSet->Damage.GetCurrentValue() + ((CustomPlayerState ? CustomPlayerState->CurrentLevel : 1) / 5.f)
 			: 1;
 	};
+	virtual void SetCastAbility_Implementation(bool IsCasting) override;
+
+	UPROPERTY(BlueprintAssignable)
+	FTriggerAbilityCam TriggerAbilityCam;
+	virtual void TriggerAbilityCam_Implementation() override;
 };
 

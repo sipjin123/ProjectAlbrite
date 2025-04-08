@@ -87,6 +87,8 @@ void AProjAlbriteCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, CurrentElement, COND_None, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, CharacterType, COND_None, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, bIsDead, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, bIsCasting, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(AProjAlbriteCharacter, bIsComboWindowActive, COND_None, REPNOTIFY_OnChanged);
 }
 
 void AProjAlbriteCharacter::InitializeAbilities()
@@ -115,7 +117,7 @@ void AProjAlbriteCharacter::GrantAbility(TSubclassOf<UAlbriteBaseGameplayAbility
 
 void AProjAlbriteCharacter::OnAbilityInputPressed(EAbilityInputID InputID)
 {
-	if (bIsDead) return;
+	if (bIsDead || bIsCasting) return;
 	
 	// Request ability cast from server
 	if (InputID == EAbilityInputID::Attack && bIsAiming)
@@ -236,6 +238,11 @@ void AProjAlbriteCharacter::BeginPlay()
 			FGameplayTag::RequestGameplayTag(FName("Status.Invulnerable")),
 			EGameplayTagEventType::NewOrRemoved)
 			.AddUObject(this, &AProjAlbriteCharacter::OnInvulnerableTagChanged);
+		
+		AbilitySystemComponent->RegisterGameplayTagEvent(
+			FGameplayTag::RequestGameplayTag(FName("Combat.ComboReady")),
+			EGameplayTagEventType::NewOrRemoved)
+			.AddUObject(this, &AProjAlbriteCharacter::OnComboTagChanged);
 		
 		AbilitySystemComponent->RegisterGameplayTagEvent(
 			FGameplayTag::RequestGameplayTag(FName("Status.Stun")),
@@ -398,13 +405,27 @@ void AProjAlbriteCharacter::OnStatusChanged(ECombatElementType ElementType, int3
 	}
 }
 
+void AProjAlbriteCharacter::OnRep_IsComboWindowActive()
+{
+	if (!HasAuthority())
+	{
+		OnComboWindowActive.Broadcast(bIsComboWindowActive);
+	}
+}
+
+void AProjAlbriteCharacter::ToggleComboWindow_Implementation(bool IsActive)
+{
+	bIsComboWindowActive = IsActive;
+	IIAlbriteCharacter::ToggleComboWindow_Implementation(IsActive);
+}
+
 void AProjAlbriteCharacter::OnRep_IsAiming()
 {
 }
 
 void AProjAlbriteCharacter::Move(const FInputActionValue& Value)
 {
-	if (bIsDead) return;
+	if (bIsDead || bIsCasting) return;
 	
 	// input is a Vector2D
 	const FVector2D MovementVector = Value.Get<FVector2D>();
@@ -429,7 +450,7 @@ void AProjAlbriteCharacter::Move(const FInputActionValue& Value)
 
 void AProjAlbriteCharacter::Look(const FInputActionValue& Value)
 {
-	if (bIsDead) return;
+	if (bIsDead || bIsCasting) return;
 	
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -440,6 +461,21 @@ void AProjAlbriteCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AProjAlbriteCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	/*
+	if (HasAuthority())
+	{
+		if (TickAnimation || (TickOnAttack && IsAttacking))
+		{
+			GetMesh()->TickAnimation(DeltaTime, false);
+			GetMesh()->RefreshBoneTransforms();
+			GetMesh()->UpdateComponentToWorld();
+		}
+	}*/
 }
 
 void AProjAlbriteCharacter::ApplyDamageToTarget(AActor* Target, float Damage)
@@ -488,6 +524,15 @@ void AProjAlbriteCharacter::OnInvulnerableTagChanged(FGameplayTag GameplayTag, i
 	}
 }
 
+void AProjAlbriteCharacter::OnComboTagChanged(FGameplayTag GameplayTag, int NewVal)
+{
+	if (HasAuthority())
+	{
+		bIsComboWindowActive = NewVal == 1 ? true : false;
+		OnComboWindowActive.Broadcast(bIsComboWindowActive);
+	}
+}
+
 void AProjAlbriteCharacter::OnStunTagChanged(FGameplayTag GameplayTag, int NewVal)
 {
 	if (HasAuthority())
@@ -508,6 +553,22 @@ void AProjAlbriteCharacter::ApplyCooldown_Implementation(TSubclassOf<UGameplayEf
 	{
 		ServerApplyCooldown(EffectClass, AbilityUsed);
 	}
+}
+
+void AProjAlbriteCharacter::SetCastAbility_Implementation(bool IsCasting)
+{
+	bIsCasting = IsCasting;
+	if (bIsCasting)
+	{
+		GetMovementComponent()->StopMovementImmediately();
+	}
+	IIDamageable::SetCastAbility_Implementation(IsCasting);
+}
+
+void AProjAlbriteCharacter::TriggerAbilityCam_Implementation()
+{
+	TriggerAbilityCam.Broadcast();
+	IIAlbriteCharacter::TriggerAbilityCam_Implementation();
 }
 
 void AProjAlbriteCharacter::ServerApplyCooldown_Implementation(TSubclassOf<UGameplayEffect> EffectClass, EAbilityInputID AbilityUsed)
