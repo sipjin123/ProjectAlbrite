@@ -3,12 +3,21 @@
 
 #include "ActorComponents/AlbriteAbilitySystemComponent.h"
 
-void UAlbriteAbilitySystemComponent::NotifyAbilityActivated(const FGameplayAbilitySpecHandle Handle,
-	UGameplayAbility* Ability)
+#include "Abilities/AlbriteBaseGameplayAbility.h"
+#include "Interfaces/IDamageable.h"
+
+void UAlbriteAbilitySystemComponent::NotifyAbilityActivated(const FGameplayAbilitySpecHandle Handle, UGameplayAbility* Ability)
 {
-	bool NewVal = HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Status.Invulnerable")));
-	if (GetOwner()->HasAuthority())
+	//bool NewVal = HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Status.Invulnerable")));
+
+	UAlbriteBaseGameplayAbility* BaseAbility = Cast<UAlbriteBaseGameplayAbility>(Ability);
+	bool NewVal = HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Ability.Active")));
+	if (GetOwnerRole() == ROLE_Authority && BaseAbility && BaseAbility->bDisabledMovement)
 	{
+		if (NewVal && GetOwner()->GetClass()->ImplementsInterface(UIDamageable::StaticClass()))
+		{
+			IIDamageable::Execute_SetCastAbility(GetOwner(), true);
+		}
 		// Do logic here for when invulnerability ends
 		// UE_LOG(LogTemp, Warning, TEXT("An Ability has Ended! %d"), NewVal ? 1 : 0);
 	}
@@ -16,8 +25,20 @@ void UAlbriteAbilitySystemComponent::NotifyAbilityActivated(const FGameplayAbili
 	Super::NotifyAbilityActivated(Handle, Ability);
 }
 
+void UAlbriteAbilitySystemComponent::NotifyAbilityEnded(FGameplayAbilitySpecHandle Handle, UGameplayAbility* Ability, bool bWasCancelled)
+{
+	UAlbriteBaseGameplayAbility* BaseAbility = Cast<UAlbriteBaseGameplayAbility>(Ability);
+	if (BaseAbility && BaseAbility->bDisabledMovement
+		&& GetOwnerRole() == ROLE_Authority
+		&& GetOwner()->GetClass()->ImplementsInterface(UIDamageable::StaticClass()))
+	{
+		IIDamageable::Execute_SetCastAbility(GetOwner(), false);
+	}
+	Super::NotifyAbilityEnded(Handle, Ability, bWasCancelled);
+}
+
 void UAlbriteAbilitySystemComponent::RemoveTagsInCategory(UAbilitySystemComponent* AbilitySystemComponent,
-	const FGameplayTag ParentTag)
+                                                          const FGameplayTag ParentTag)
 {
 	if (!AbilitySystemComponent) return;
 

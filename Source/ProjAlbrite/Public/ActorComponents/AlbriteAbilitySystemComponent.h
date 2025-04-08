@@ -16,6 +16,8 @@ class PROJALBRITE_API UAlbriteAbilitySystemComponent : public UAbilitySystemComp
 	
 	virtual void NotifyAbilityActivated(const FGameplayAbilitySpecHandle Handle, UGameplayAbility* Ability) override;
 
+	virtual void NotifyAbilityEnded(FGameplayAbilitySpecHandle Handle, UGameplayAbility* Ability, bool bWasCancelled) override;
+	
 	// Custom code removing tags within a category
 	UFUNCTION(BlueprintCallable)
 	void RemoveTagsInCategory(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayTag ParentTag);
