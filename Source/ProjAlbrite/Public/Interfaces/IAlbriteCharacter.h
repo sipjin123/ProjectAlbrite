@@ -33,4 +33,16 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
 	void ApplyCooldown(TSubclassOf<UGameplayEffect> EffectClass, EAbilityInputID AbilityUsed);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
+	void ToggleComboWindow(bool IsActive);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
+	bool GetIsComboActive();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
+	void TriggerAbilityCam();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
+	void SetCamLock(bool IsLocked);
 };

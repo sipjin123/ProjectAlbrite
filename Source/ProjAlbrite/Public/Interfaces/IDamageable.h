@@ -55,4 +55,7 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
 	float GetDamageBasedOnLevel();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Character")
+	void SetCastAbility(bool IsCasting);
 };
