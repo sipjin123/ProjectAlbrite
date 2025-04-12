@@ -129,6 +129,12 @@ void AAlbritePlayerController::BeginPlay()
 
 	SetInputMode(InputMode);
 	bShowMouseCursor = true; // Hide system cursor
+
+	AProjAlbriteGameMode* GM = Cast<AProjAlbriteGameMode>(GetWorld()->GetAuthGameMode());
+	if (GM && GM->bIsAutoSpawn)
+	{
+		GM->RequestSpawn(this);
+	}
 }
 
 void AAlbritePlayerController::Client_JoinLobby_Implementation(const FString& ServerAddress)
